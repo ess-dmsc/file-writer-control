@@ -3,6 +3,8 @@ import threading
 from filewriter_control.KafkaTopicUrl import KafkaTopicUrl
 from kafka import KafkaConsumer
 from copy import copy
+from streaming_data_types.utils import check_schema_identifier
+from streaming_data_types import deserialise_answ
 
 
 class CommandChannel:
@@ -26,11 +28,9 @@ class CommandChannel:
     def thread_function(self, host: str, topic: str):
         consumer = KafkaConsumer(bootstrap_servers=host, topics=topic, fetch_max_bytes=52428800*6)
         while self.run_thread:
-            import time
-            time.sleep(0.1)
             messages = consumer.poll(timeout_ms=100)
             for message in messages:
-                pass
+                if check_schema_identifier(message, )
 
 
 
