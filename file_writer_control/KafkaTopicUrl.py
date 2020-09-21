@@ -9,7 +9,7 @@ class KafkaTopicUrl:
         if result is None:
             raise RuntimeError("Unable to match kafka url.")
         self.port = 9092
-        if result.group(7) is not "":
+        if result.group(7) != "":
             self.port = int(result.group(7))
         self.host = result.group(4)
         self.host_port = "{}:{}".format(self.host, self.port)
