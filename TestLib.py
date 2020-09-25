@@ -1,4 +1,4 @@
-from file_writer_control.WorkerFinder import WorkerCommandChannel
+from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
 from file_writer_control.JobHandler import JobHandler
 from file_writer_control.WriteJob import WriteJob
 from file_writer_control.CommandHandler import CommandState

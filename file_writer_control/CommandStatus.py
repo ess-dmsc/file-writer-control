@@ -3,6 +3,7 @@ from datetime import datetime
 
 
 class CommandState(Enum):
+    UNKNOWN = auto()
     NO_COMMAND = auto()
     WAITING_RESPONSE = auto()
     TIMEOUT_RESPONSE = auto()
@@ -30,4 +31,4 @@ class CommandStatus(object):
         if len(new_status.error_message) != 0:
             self.error_message = new_status.error_message
         self.last_update = new_status.last_update
-        
+

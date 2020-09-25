@@ -2,6 +2,7 @@ from typing import List
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
 
+
 class Worker:
     def __init__(self, service_id: str):
         self.status = WorkerStatus(service_id)

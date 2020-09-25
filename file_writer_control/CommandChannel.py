@@ -201,6 +201,16 @@ class CommandChannel(object):
         self.update_workers()
         return list(self.map_of_jobs.values())
 
+    def get_job(self, job_id: str) -> JobStatus:
+        if job_id in self.map_of_jobs:
+            return self.map_of_jobs[job_id]
+        return None
+
+    def get_command(self, command_id: str) -> JobStatus:
+        if command_id in self.map_of_commands:
+            return self.map_of_commands[command_id]
+        return None
+
     def list_commands(self) -> List[CommandStatus]:
         self.update_workers()
         return list(self.map_of_commands.values())

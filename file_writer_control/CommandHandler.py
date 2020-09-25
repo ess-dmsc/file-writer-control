@@ -8,14 +8,14 @@ class CommandHandler:
         self.command_channel = command_channel
 
     def get_state(self) -> CommandState:
-        for command in self.command_channel.list_commands():
-            if command.command_id == self.command_id:
-                return command.state
-        return CommandState.NO_COMMAND
+        command = self.command_channel.get_command(self.command_id)
+        if command is None:
+            return CommandState.UNKNOWN
+        return command.state
 
     def get_error_string(self) -> str:
-        for command in self.command_channel.list_commands():
-            if command.command_id == self.command_id:
-                return command.error_message
-        return ""
+        command = self.command_channel.get_command(self.command_id)
+        if command is None:
+            return ""
+        return command.error_message
 
