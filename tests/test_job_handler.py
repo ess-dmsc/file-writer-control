@@ -78,7 +78,6 @@ def test_set_stop_now_no_id():
     worker_finder_mock.get_job_status.return_value = None
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
-    test_stop_time = datetime.now()
     assert under_test.stop_now() is None
 
 

@@ -1,24 +1,20 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from streaming_data_types import serialise_pl72
 import platform
 import os
-
-
-def fletcher32(string) -> int:
-    a = list(map(ord, string))
-    b = [sum(a[:i]) % 65535 for i in range(len(a)+1)]
-    return ((sum(b) << 16) | max(b)) & 0xffffffff
+from zlib import adler32
+from random import randint
 
 
 def generate_job_id() -> str:
     timestamp = int(datetime.now().timestamp())
-    timestamp_str = "%0.2X" % timestamp
-    partial_id = "{}-{}-{}-".format(platform.node(), os.getpid(), timestamp_str)
-    return partial_id + "%0.8X" % fletcher32(partial_id)
+    timestamp_str = "{:08X}".format(timestamp ^ 0xFFFFFFFF)
+    partial_id = "{}-{}-{}-{}-".format(platform.node(), os.getpid(), timestamp_str, "{:04X}".format(randint(0, 65535)))
+    return partial_id + "{:08X}".format(adler32(partial_id.encode()))
 
 
 class WriteJob:
-    def __init__(self, nexus_structure: str, file_name: str, broker: str, start_time: datetime, stop_time=datetime.max):
+    def __init__(self, nexus_structure: str, file_name: str, broker: str, start_time: datetime, stop_time=datetime.max - timedelta(days=365)):
         self.structure = nexus_structure
         self.file = file_name
         self.job_id = generate_job_id()

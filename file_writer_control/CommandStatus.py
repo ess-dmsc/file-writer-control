@@ -21,7 +21,7 @@ class CommandStatus(object):
 
     def __eq__(self, other):
         if not isinstance(other, CommandStatus):
-            return NotImplemented
+            raise NotImplementedError
         return other.command_id == self.command_id and other.job_id == self.job_id and other.state == self.state
 
     def update_status(self, new_status):

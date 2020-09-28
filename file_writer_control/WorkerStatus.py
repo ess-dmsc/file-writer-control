@@ -17,7 +17,7 @@ class WorkerStatus(object):
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, WorkerStatus):
-            return NotImplemented
+            raise NotImplementedError
         return self.service_id == other.service_id and self.state == other.state
 
     def update_status(self, new_status):
