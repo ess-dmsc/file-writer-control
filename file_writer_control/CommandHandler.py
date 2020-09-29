@@ -18,4 +18,3 @@ class CommandHandler:
         if command is None:
             return ""
         return command.error_message
-

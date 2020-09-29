@@ -2,7 +2,9 @@ import re
 
 
 class KafkaTopicUrl:
-    test_regexp = re.compile(r"^(\s*(kafka://)?((([^/?#:]+)+)(:(\d+){1,5})?)/([a-zA-Z0-9._-]+)\s*)$")
+    test_regexp = re.compile(
+        r"^(\s*(kafka://)?((([^/?#:]+)+)(:(\d+){1,5})?)/([a-zA-Z0-9._-]+)\s*)$"
+    )
 
     def __init__(self, url: str):
         result = re.match(KafkaTopicUrl.test_regexp, url)

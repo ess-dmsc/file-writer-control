@@ -27,10 +27,14 @@ class JobHandler:
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return None
-        return self.worker_finder.try_send_stop_time(current_status.service_id, self.job_id, stop_time)
+        return self.worker_finder.try_send_stop_time(
+            current_status.service_id, self.job_id, stop_time
+        )
 
     def stop_now(self) -> CommandHandler:
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return None
-        return self.worker_finder.try_send_stop_now(current_status.service_id, self.job_id)
+        return self.worker_finder.try_send_stop_now(
+            current_status.service_id, self.job_id
+        )

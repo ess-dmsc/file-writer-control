@@ -1,4 +1,8 @@
-from streaming_data_types.action_response_answ import ActionResponse, ActionOutcome, ActionType
+from streaming_data_types.action_response_answ import (
+    ActionResponse,
+    ActionOutcome,
+    ActionType,
+)
 from json import loads
 from file_writer_control.CommandStatus import CommandState
 from file_writer_control.JobStatus import JobState
@@ -17,7 +21,10 @@ def extract_worker_state_from_status(status: StatusMessage) -> WorkerState:
 
 
 def extract_state_from_command_answer(answer: ActionResponse) -> CommandState:
-    status_map = {ActionOutcome.Failure: CommandState.ERROR, ActionOutcome.Success: CommandState.SUCCESS}
+    status_map = {
+        ActionOutcome.Failure: CommandState.ERROR,
+        ActionOutcome.Success: CommandState.SUCCESS,
+    }
     try:
         return status_map[answer.outcome]
     except KeyError:

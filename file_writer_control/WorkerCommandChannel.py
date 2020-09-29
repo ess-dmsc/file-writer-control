@@ -20,7 +20,9 @@ class WorkerCommandChannel(WorkerFinder):
         thread_kwargs = {"do_job": job}
         self.command_channel.add_job_id(job.job_id)
         self.command_channel.add_command_id(job.job_id, job.job_id)
-        temp_thread = threading.Thread(target=self.start_job_thread_function, daemon=True, kwargs=thread_kwargs)
+        temp_thread = threading.Thread(
+            target=self.start_job_thread_function, daemon=True, kwargs=thread_kwargs
+        )
         temp_thread.start()
         self.start_job_threads.append(temp_thread)
         return CommandHandler(self.command_channel, job.job_id)
@@ -42,9 +44,13 @@ class WorkerCommandChannel(WorkerFinder):
             if waiting_to_send_job:
                 list_of_idle_workers = self.get_idle_workers()
                 if len(list_of_idle_workers) > 0:
-                    used_worker = list_of_idle_workers[randrange(len(list_of_idle_workers))]
+                    used_worker = list_of_idle_workers[
+                        randrange(len(list_of_idle_workers))
+                    ]
                     do_job.service_id = used_worker.service_id
-                    self.message_producer.send(self.command_topic, do_job.get_start_message())
+                    self.message_producer.send(
+                        self.command_topic, do_job.get_start_message()
+                    )
                     waiting_to_send_job = False
                     job_started_time = time.time()
             else:

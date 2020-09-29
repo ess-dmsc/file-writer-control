@@ -16,7 +16,9 @@ def test_start_job():
     test_job = WriteJob("{}", "some_file_name", "some_broker", datetime.now())
     worker_finder_mock = Mock()
     under_test = JobHandler(worker_finder_mock)
-    assert under_test.start_job(test_job) == worker_finder_mock.try_start_job.return_value
+    assert (
+        under_test.start_job(test_job) == worker_finder_mock.try_start_job.return_value
+    )
     worker_finder_mock.try_start_job.assert_called_once_with(test_job)
 
 
@@ -68,8 +70,13 @@ def test_set_stop_time_with_id():
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
     test_stop_time = datetime.now()
-    assert under_test.set_stop_time(test_stop_time) is worker_finder_mock.try_send_stop_time.return_value
-    worker_finder_mock.try_send_stop_time.assert_called_once_with(test_job_status.service_id, test_job.job_id, test_stop_time)
+    assert (
+        under_test.set_stop_time(test_stop_time)
+        is worker_finder_mock.try_send_stop_time.return_value
+    )
+    worker_finder_mock.try_send_stop_time.assert_called_once_with(
+        test_job_status.service_id, test_job.job_id, test_stop_time
+    )
 
 
 def test_set_stop_now_no_id():
@@ -90,4 +97,6 @@ def test_set_stop_now_with_id():
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
     assert under_test.stop_now() is worker_finder_mock.try_send_stop_now.return_value
-    worker_finder_mock.try_send_stop_now.assert_called_once_with(test_job_status.service_id, test_job.job_id)
+    worker_finder_mock.try_send_stop_now.assert_called_once_with(
+        test_job_status.service_id, test_job.job_id
+    )

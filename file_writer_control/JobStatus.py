@@ -22,7 +22,11 @@ class JobStatus:
 
     def update_status(self, new_status):
         if new_status.job_id != self.job_id:
-            raise RuntimeError("Job id of status update is not correct ({} vs {})".format(self.job_id, new_status.job_id))
+            raise RuntimeError(
+                "Job id of status update is not correct ({} vs {})".format(
+                    self.job_id, new_status.job_id
+                )
+            )
         self.last_update = new_status.last_update
         self.state = new_status.state
         if len(new_status.error_message) != 0:

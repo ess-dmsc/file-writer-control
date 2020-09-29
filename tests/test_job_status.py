@@ -13,4 +13,3 @@ def test_update_status_success():
     under_test1 = JobStatus("Some_id1")
     under_test2 = JobStatus("Some_id1")
     under_test1.update_status(under_test2)  # No exception
-

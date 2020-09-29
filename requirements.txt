@@ -1,2 +1,2 @@
 kafka-python
-ess-streaming-data-types >= 0.9.3
+#ess-streaming-data-types >= 0.9.3

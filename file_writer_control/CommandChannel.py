@@ -17,8 +17,12 @@ def thread_function(hostport: str, topic: str, in_queue: Queue, out_queue: Queue
     status_tracker = InThreadStatusTracker(out_queue)
     while True:
         try:
-            consumer = KafkaConsumer(topic, bootstrap_servers=hostport, fetch_max_bytes=52428800 * 6,
-                                     consumer_timeout_ms=100)  # Roughly 300MB
+            consumer = KafkaConsumer(
+                topic,
+                bootstrap_servers=hostport,
+                fetch_max_bytes=52428800 * 6,
+                consumer_timeout_ms=100,
+            )  # Roughly 300MB
             break
         except NoBrokersAvailable:
             pass
@@ -42,16 +46,24 @@ class CommandChannel(object):
         kafka_address = KafkaTopicUrl(command_topic_url)
         self.status_queue = Queue()
         self.to_thread_queue = Queue()
-        thread_kwargs = {"hostport": kafka_address.host_port, "topic": kafka_address.topic, "in_queue": self.to_thread_queue, "out_queue": self.status_queue}
+        thread_kwargs = {
+            "hostport": kafka_address.host_port,
+            "topic": kafka_address.topic,
+            "in_queue": self.to_thread_queue,
+            "out_queue": self.status_queue,
+        }
         self.map_of_workers = {}
         self.map_of_jobs = {}
         self.map_of_commands = {}
         self.run_thread = True
-        self.thread = threading.Thread(target=thread_function, daemon=True, kwargs=thread_kwargs)
+        self.thread = threading.Thread(
+            target=thread_function, daemon=True, kwargs=thread_kwargs
+        )
         self.thread.start()
 
         def do_exit():
             self.stop_thread()
+
         atexit.register(do_exit)
 
     def add_job_id(self, job_id: str):
@@ -78,7 +90,9 @@ class CommandChannel(object):
             if type(status_update) is WorkerStatus:
                 if status_update.service_id not in self.map_of_workers:
                     self.map_of_workers[status_update.service_id] = status_update
-                self.map_of_workers[status_update.service_id].update_status(status_update)
+                self.map_of_workers[status_update.service_id].update_status(
+                    status_update
+                )
             elif type(status_update) is JobStatus:
                 if status_update.job_id not in self.map_of_jobs:
                     self.map_of_jobs[status_update.job_id] = status_update
@@ -86,7 +100,9 @@ class CommandChannel(object):
             elif type(status_update) is CommandStatus:
                 if status_update.command_id not in self.map_of_commands:
                     self.map_of_commands[status_update.command_id] = status_update
-                self.map_of_commands[status_update.command_id].update_status(status_update)
+                self.map_of_commands[status_update.command_id].update_status(
+                    status_update
+                )
             else:
                 pass
 

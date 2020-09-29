@@ -22,6 +22,10 @@ class WorkerStatus(object):
 
     def update_status(self, new_status):
         if new_status.service_id != self.service_id:
-            raise RuntimeError("Service id of status update is not correct ({} vs {})".format(self.service_id, new_status.service_id))
+            raise RuntimeError(
+                "Service id of status update is not correct ({} vs {})".format(
+                    self.service_id, new_status.service_id
+                )
+            )
         self.last_update = new_status.last_update
         self.state = new_status.state

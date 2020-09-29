@@ -10,6 +10,7 @@ from datetime import datetime
 from streaming_data_types.run_stop_6s4t import serialise_6s4t as serialise_stop
 from file_writer_control.CommandId import generate_command_id
 
+
 class WorkerFinder:
     def __init__(self, command_topic_url: str):
         self.command_channel = CommandChannel(command_topic_url)
@@ -23,9 +24,13 @@ class WorkerFinder:
     def try_start_job(self, job: WriteJob) -> CommandHandler:
         raise NotImplementedError("Not implemented in base class.")
 
-    def try_send_stop_time(self, service_id: str, job_id: str, stop_time: datetime) -> CommandHandler:
+    def try_send_stop_time(
+        self, service_id: str, job_id: str, stop_time: datetime
+    ) -> CommandHandler:
         command_id = generate_command_id("STOP_TIME")
-        message = serialise_stop(job_id, "some_name", service_id, command_id, stop_time.timestamp() * 1000)
+        message = serialise_stop(
+            job_id, "some_name", service_id, command_id, stop_time.timestamp() * 1000
+        )
         self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
         self.send_command(message)
         return CommandHandler(self.command_channel, command_id)
@@ -51,4 +56,3 @@ class WorkerFinder:
 
     def get_job_status(self, job_id: str) -> JobStatus:
         return self.command_channel.get_job(job_id)
-

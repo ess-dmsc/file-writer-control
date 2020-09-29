@@ -1,7 +1,9 @@
 import os
 from setuptools import setup, find_packages
 
-DESCRIPTION = "A small Python library for controlling the ESS kafka-to-nexus file-writer."
+DESCRIPTION = (
+    "A small Python library for controlling the ESS kafka-to-nexus file-writer."
+)
 
 here = os.path.abspath(os.path.dirname(__file__))
 
