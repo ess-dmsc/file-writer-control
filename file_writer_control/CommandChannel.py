@@ -24,7 +24,7 @@ from file_writer_control.CommandStatus import CommandStatus, CommandState
 STATUS_MESSAGE_TIMEOUT = timedelta(seconds=5)
 
 
-def extract_state_from_status(status: StatusMessage):
+def extract_worker_state_from_status(status: StatusMessage) -> WorkerState:
     json_struct = loads(status.status_json)
     status_map = {"writing": WorkerState.WRITING, "idle": WorkerState.IDLE}
     try:
@@ -33,14 +33,16 @@ def extract_state_from_status(status: StatusMessage):
     except KeyError:
         return WorkerState.UNKNOWN
 
-def extract_state_from_command_answer(answer: ActionResponse):
+
+def extract_state_from_command_answer(answer: ActionResponse) -> CommandState:
     status_map = {ActionOutcome.Failure: CommandState.ERROR, ActionOutcome.Success: CommandState.SUCCESS}
     try:
         return status_map[answer.outcome]
     except KeyError:
         return CommandState.ERROR
 
-def extract_job_state_from_answer(answer: ActionResponse):
+
+def extract_job_state_from_answer(answer: ActionResponse) -> JobState:
     if answer.action == ActionType.HasStopped:
         if answer.outcome == ActionOutcome.Success:
             return JobState.DONE
@@ -105,14 +107,13 @@ class InThreadStatusTracker:
             working_command.error_message = answer.message
             self.queue.put(working_command)
 
-
     def process_status(self, message: bytes):
         status_update = deserialise_status(message)
         if status_update.service_id not in self.known_workers:
             self.known_workers[status_update.service_id] = WorkerStatus(status_update.service_id)
         self.known_workers[status_update.service_id].last_update = datetime.now()
         working_status = copy(self.known_workers[status_update.service_id])
-        working_status.state = extract_state_from_status(status_update)
+        working_status.state = extract_worker_state_from_status(status_update)
         if working_status != self.known_workers[status_update.service_id]:
             self.known_workers[status_update.service_id] = working_status
             self.queue.put(working_status)
@@ -127,6 +128,10 @@ def thread_function(hostport: str, topic: str, in_queue: Queue, out_queue: Queue
             break
         except NoBrokersAvailable:
             pass
+        if not in_queue.empty():
+            new_msg = in_queue.get()
+            if new_msg == "exit":
+                return
     while True:
         for message in consumer:
             status_tracker.process_message(message.value)
@@ -139,8 +144,6 @@ def thread_function(hostport: str, topic: str, in_queue: Queue, out_queue: Queue
 
 
 class CommandChannel(object):
-    global_run_thread = True
-
     def __init__(self, command_topic_url: str):
         kafka_address = KafkaTopicUrl(command_topic_url)
         self.status_queue = Queue()
@@ -191,7 +194,7 @@ class CommandChannel(object):
                     self.map_of_commands[status_update.command_id] = status_update
                 self.map_of_commands[status_update.command_id].update_status(status_update)
             else:
-                print("Unknown update type!")
+                pass
 
     def list_workers(self) -> List[WorkerStatus]:
         self.update_workers()
@@ -206,7 +209,12 @@ class CommandChannel(object):
             return self.map_of_jobs[job_id]
         return None
 
-    def get_command(self, command_id: str) -> JobStatus:
+    def get_worker(self, service_id: str) -> WorkerStatus:
+        if service_id in self.map_of_workers:
+            return self.map_of_workers[service_id]
+        return None
+
+    def get_command(self, command_id: str) -> CommandStatus:
         if command_id in self.map_of_commands:
             return self.map_of_commands[command_id]
         return None

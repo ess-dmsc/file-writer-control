@@ -1,7 +1,7 @@
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.WorkerFinder import WorkerFinder
 from file_writer_control.WriteJob import WriteJob
-from file_writer_control.Worker import WorkerStatus, WorkerState
+from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
 from file_writer_control.JobStatus import JobState, JobStatus
 from typing import List
 from random import randrange
