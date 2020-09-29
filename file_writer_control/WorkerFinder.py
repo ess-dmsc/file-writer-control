@@ -1,4 +1,4 @@
-from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
+from file_writer_control.WorkerStatus import WorkerStatus
 from file_writer_control.WriteJob import WriteJob
 from file_writer_control.JobStatus import JobState, JobStatus
 from typing import List

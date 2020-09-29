@@ -1,5 +1,5 @@
 from file_writer_control.CommandChannel import CommandChannel
-from file_writer_control.CommandStatus import CommandState, CommandStatus
+from file_writer_control.CommandStatus import CommandState
 
 
 class CommandHandler:

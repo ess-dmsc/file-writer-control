@@ -3,7 +3,6 @@ from queue import Queue
 from streaming_data_types.status_x5f2 import StatusMessage
 from file_writer_control.WorkerStatus import WorkerStatus
 from streaming_data_types.action_response_answ import (
-    ActionResponse,
     ActionOutcome,
     ActionType,
     Response,

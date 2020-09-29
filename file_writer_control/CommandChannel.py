@@ -78,7 +78,7 @@ class CommandChannel(object):
         self.to_thread_queue.put("exit")
         try:
             self.thread.join()
-        except RuntimeError as e:
+        except RuntimeError:
             pass
 
     def __del__(self):

@@ -18,8 +18,6 @@ from file_writer_control.StateExtractor import (
 )
 from copy import copy
 from streaming_data_types.action_response_answ import (
-    ActionResponse,
-    ActionOutcome,
     ActionType,
     Response,
 )
