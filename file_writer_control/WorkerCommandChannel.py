@@ -1,9 +1,8 @@
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.WorkerFinder import WorkerFinder
 from file_writer_control.WriteJob import WriteJob
-from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
-from file_writer_control.JobStatus import JobState, JobStatus
-from typing import List
+from file_writer_control.WorkerStatus import WorkerState
+from file_writer_control.JobStatus import JobState
 from random import randrange
 import threading
 import time
@@ -17,7 +16,7 @@ class WorkerCommandChannel(WorkerFinder):
         super(WorkerFinder, self).__init__(command_topic_url)
         self.start_job_threads = []
 
-    def try_start_job(self, job: WriteJob):
+    def try_start_job(self, job: WriteJob) -> CommandHandler:
         thread_kwargs = {"do_job": job}
         self.command_channel.add_job_id(job.job_id)
         self.command_channel.add_command_id(job.job_id, job.job_id)
