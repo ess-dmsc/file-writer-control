@@ -3,7 +3,7 @@ from queue import Queue
 from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
-from typing import List
+from typing import List, Union
 import atexit
 
 from file_writer_control.InThreadStatusTracker import InThreadStatusTracker
@@ -13,13 +13,13 @@ from file_writer_control.JobStatus import JobStatus
 from file_writer_control.CommandStatus import CommandStatus
 
 
-def thread_function(hostport: str, topic: str, in_queue: Queue, out_queue: Queue):
+def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queue):
     status_tracker = InThreadStatusTracker(out_queue)
     while True:
         try:
             consumer = KafkaConsumer(
                 topic,
-                bootstrap_servers=hostport,
+                bootstrap_servers=host_port,
                 fetch_max_bytes=52428800 * 6,
                 consumer_timeout_ms=100,
             )  # Roughly 300MB
@@ -114,17 +114,21 @@ class CommandChannel(object):
         self.update_workers()
         return list(self.map_of_jobs.values())
 
-    def get_job(self, job_id: str) -> JobStatus:
+    def list_commands(self) -> List[CommandStatus]:
+        self.update_workers()
+        return list(self.map_of_commands.values())
+
+    def get_job(self, job_id: str) -> Union[JobStatus, None]:
         if job_id in self.map_of_jobs:
             return self.map_of_jobs[job_id]
         return None
 
-    def get_worker(self, service_id: str) -> WorkerStatus:
+    def get_worker(self, service_id: str) -> Union[WorkerStatus, None]:
         if service_id in self.map_of_workers:
             return self.map_of_workers[service_id]
         return None
 
-    def get_command(self, command_id: str) -> CommandStatus:
+    def get_command(self, command_id: str) -> Union[CommandStatus, None]:
         if command_id in self.map_of_commands:
             return self.map_of_commands[command_id]
         return None

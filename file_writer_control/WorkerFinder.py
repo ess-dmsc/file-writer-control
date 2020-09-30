@@ -1,6 +1,7 @@
 from file_writer_control.WorkerStatus import WorkerStatus
 from file_writer_control.WriteJob import WriteJob
 from file_writer_control.JobStatus import JobState, JobStatus
+from file_writer_control.CommandStatus import CommandStatus
 from typing import List
 from file_writer_control.CommandChannel import CommandChannel
 from file_writer_control.CommandHandler import CommandHandler
@@ -29,7 +30,7 @@ class WorkerFinder:
     ) -> CommandHandler:
         command_id = generate_command_id("STOP_TIME")
         message = serialise_stop(
-            job_id, "some_name", service_id, command_id, stop_time.timestamp() * 1000
+            job_id, "some_name", service_id, command_id, int(stop_time.timestamp() * 1000)
         )
         self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
         self.send_command(message)
@@ -47,6 +48,9 @@ class WorkerFinder:
 
     def list_known_jobs(self) -> List[JobStatus]:
         return self.command_channel.list_jobs()
+
+    def list_known_commands(self) -> List[CommandStatus]:
+        return self.command_channel.list_commands()
 
     def get_job_state(self, job_id: str) -> JobState:
         current_job = self.command_channel.get_job(job_id)

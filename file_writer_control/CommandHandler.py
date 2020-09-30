@@ -13,6 +13,9 @@ class CommandHandler:
             return CommandState.UNKNOWN
         return command.state
 
+    def is_done(self) -> bool:
+        return self.command_channel.get_command(self.command_id) == CommandState.SUCCESS
+
     def get_error_string(self) -> str:
         command = self.command_channel.get_command(self.command_id)
         if command is None:

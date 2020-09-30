@@ -18,3 +18,4 @@ class WorkerJobPool(WorkerFinder):
         self.command_channel.add_command_id(job.job_id)
         self.command_channel.add_command_id((job.job_id, job.job_id))
         self.send_pool_message(job.get_start_message())
+        return CommandHandler(self.command_channel, job.job_id)

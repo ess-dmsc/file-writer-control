@@ -3,6 +3,7 @@ from file_writer_control.WriteJob import WriteJob
 from file_writer_control.CommandHandler import CommandHandler
 from datetime import datetime
 from file_writer_control.JobStatus import JobState
+from typing import Union
 
 
 class JobHandler:
@@ -17,13 +18,16 @@ class JobHandler:
     def get_state(self) -> JobState:
         return self.worker_finder.get_job_state(self.job_id)
 
+    def is_done(self):
+        return self.worker_finder.get_job_state(self.job_id) == JobState.DONE
+
     def error_string(self) -> str:
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return ""
         return current_status.error_message
 
-    def set_stop_time(self, stop_time: datetime) -> CommandHandler:
+    def set_stop_time(self, stop_time: datetime) -> Union[CommandHandler, None]:
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return None
@@ -31,7 +35,7 @@ class JobHandler:
             current_status.service_id, self.job_id, stop_time
         )
 
-    def stop_now(self) -> CommandHandler:
+    def stop_now(self) -> Union[CommandHandler, None]:
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return None
