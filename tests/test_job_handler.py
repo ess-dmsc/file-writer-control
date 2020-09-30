@@ -35,7 +35,7 @@ def test_error_string_no_id():
     worker_finder_mock.get_job_status.return_value = None
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
-    assert under_test.error_string() == ""
+    assert under_test.get_error_string() == ""
     worker_finder_mock.get_job_status.assert_called_once_with(test_job.job_id)
 
 
@@ -47,7 +47,7 @@ def test_error_string_with_id():
     worker_finder_mock.get_job_status.return_value = test_job_status
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
-    assert under_test.error_string() is test_job_status.error_message
+    assert under_test.get_error_string() is test_job_status.error_message
     worker_finder_mock.get_job_status.assert_called_once_with(test_job.job_id)
 
 

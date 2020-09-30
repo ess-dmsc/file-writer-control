@@ -44,6 +44,13 @@ pip install --user -r requirements.txt
 
 **Also note:** This library was developed using Python 3.8 but it is likely that it will work with Python 3.6 and up.
 
+## Running the unit tests
+For running the unit tests, execute the following command in the root of this repository:
+
+```bash
+python -m pytest -s .
+```
+
 ## Installing the development version locally
 
 First, uninstall any existing versions of this library:

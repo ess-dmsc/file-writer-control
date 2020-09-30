@@ -1,4 +1,5 @@
 from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
+from file_writer_control.WorkerJobPool import WorkerJobPool
 from file_writer_control.WriteJob import WriteJob
 from file_writer_control.CommandStatus import CommandState
 from file_writer_control.JobStatus import JobState
@@ -9,7 +10,7 @@ import time
 
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"
-    command_channel = WorkerCommandChannel("{}/command_topic".format(kafka_host))
+    command_channel = WorkerJobPool("{}/job_topic".format(kafka_host), "{}/command_topic".format(kafka_host))
     job_handler = JobHandler(worker_finder=command_channel)
     start_time = datetime.now()
     with open('file_writer_config.json', 'r') as f:
