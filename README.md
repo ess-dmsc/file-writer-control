@@ -61,6 +61,7 @@ pip uninstall file-writer-control
 
 Then, from the *file-writer-control* root directory, run the following command:
 
+```bash
 pip install --user -e ./
-
+```
 
