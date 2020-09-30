@@ -7,7 +7,7 @@ from file_writer_control.CommandHandler import CommandHandler
 
 class WorkerJobPool(WorkerFinder):
     def __init__(self, job_topic_url: str, command_topic_url: str):
-        super(WorkerFinder, self).__init__(command_topic_url)
+        super().__init__(command_topic_url)
         self.job_pool = KafkaTopicUrl(job_topic_url)
         self.pool_producer = KafkaProducer(bootstrap_servers=[self.job_pool.host_port])
 

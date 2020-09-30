@@ -13,7 +13,7 @@ SEND_JOB_TIMEOUT = 10  # Seconds
 
 class WorkerCommandChannel(WorkerFinder):
     def __init__(self, command_topic_url: str):
-        super(WorkerFinder, self).__init__(command_topic_url)
+        super().__init__(command_topic_url)
         self.start_job_threads = []
 
     def try_start_job(self, job: WriteJob) -> CommandHandler:

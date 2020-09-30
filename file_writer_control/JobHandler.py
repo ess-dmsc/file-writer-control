@@ -21,7 +21,7 @@ class JobHandler:
     def is_done(self):
         return self.worker_finder.get_job_state(self.job_id) == JobState.DONE
 
-    def error_string(self) -> str:
+    def get_error_string(self) -> str:
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return ""

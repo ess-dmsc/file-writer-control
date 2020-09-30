@@ -1,30 +1,30 @@
 from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
 import time
 
-def print_current_state(command_channel):
+
+def print_current_state(channel: WorkerCommandChannel):
     print("Known workers")
     print("{:30s}{:30s}".format("Service id", "Current state"))
     print("-" * 80)
-    for worker in command_channel.list_known_workers():
+    for worker in channel.list_known_workers():
         print("{:30s}{:30s}".format(worker.service_id, worker.state))
 
-    print("Known jobs")
+    print("\nKnown jobs")
     print("{:30s}{:30s}{:30s}".format("Service id", "Job id", "Current state"))
     print("-" * 80)
-    for job in command_channel.list_known_jobs():
+    for job in channel.list_known_jobs():
         print("{:30s}{:30s}{:30s}".format(job.service_id, job.job_id, job.state))
         if len(job.error_message) > 0:
             print("    Message: {}".format(job.error_message))
 
-    print("Known commands")
-    print("{:30s}{:30s}{:30s}{:30s}".format("Service id", "Job id", "Command id", "Current state"))
+    print("\nKnown commands")
+    print("{:30s}{:30s}{:30s}".format("Job id", "Command id", "Current state"))
     print("-" * 80)
-    print("{:30s}{:30s}{:30s}".format(job.service_id, job.job_id, job.state))
+    for command in channel.list_known_commands():
+        print("{:26}{:26}{:26}".format(command.job_id, command.command_id, command.state))
+        if len(command.error_message) > 0:
+            print("    Message: {}".format(command.error_message))
 
-
-for job in command_channel.list():
-    if len(job.error_message) > 0:
-        print("    Message: {}".format(job.error_message))
 
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"

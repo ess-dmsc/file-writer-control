@@ -47,7 +47,7 @@ class CommandChannel(object):
         self.status_queue = Queue()
         self.to_thread_queue = Queue()
         thread_kwargs = {
-            "hostport": kafka_address.host_port,
+            "host_port": kafka_address.host_port,
             "topic": kafka_address.topic,
             "in_queue": self.to_thread_queue,
             "out_queue": self.status_queue,
