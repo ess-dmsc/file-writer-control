@@ -15,9 +15,15 @@ class WorkerCommandChannel(WorkerFinder):
     def __init__(self, command_topic_url: str):
         super().__init__(command_topic_url)
         self.start_job_threads = []
+        self._stop_event = threading.Event()
+
+    def stop_threads(self):
+        self._stop_event.set()
+        for thread in self.start_job_threads:
+            thread.join()
 
     def try_start_job(self, job: WriteJob) -> CommandHandler:
-        thread_kwargs = {"do_job": job}
+        thread_kwargs = {"do_job": job, "stop_event":self._stop_event}
         self.command_channel.add_job_id(job.job_id)
         self.command_channel.add_command_id(job.job_id, job.job_id)
         temp_thread = threading.Thread(
@@ -35,12 +41,12 @@ class WorkerCommandChannel(WorkerFinder):
                 list_of_idle_workers.append(worker)
         return list_of_idle_workers
 
-    def start_job_thread_function(self, do_job: WriteJob):
+    def start_job_thread_function(self, do_job: WriteJob, stop_event: threading.Event):
         job_started_time = start_time = time.time()
 
         waiting_to_send_job = True
 
-        while start_time + START_JOB_TIMEOUT > time.time():
+        while start_time + START_JOB_TIMEOUT > time.time() and not stop_event.is_set():
             if waiting_to_send_job:
                 list_of_idle_workers = self.get_idle_workers()
                 if len(list_of_idle_workers) > 0:

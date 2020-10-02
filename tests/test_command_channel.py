@@ -17,6 +17,7 @@ def test_add_job_id():
     under_test.add_job_id(job_id_2)
     assert len(under_test.list_jobs()) == 2
     assert under_test.get_job(job_id_2).job_id == job_id_2
+    under_test.stop_thread()
 
 
 def test_add_command_id():
@@ -33,6 +34,7 @@ def test_add_command_id():
     under_test.add_command_id(job_id, command_id_2)
     assert len(under_test.list_commands()) == 2
     assert under_test.get_command(command_id_2).command_id == command_id_2
+    under_test.stop_thread()
 
 
 def test_update_worker_status():
@@ -45,6 +47,7 @@ def test_update_worker_status():
     under_test.update_workers()
     assert len(under_test.list_workers()) == 1
     assert under_test.get_worker(service_id).service_id == service_id
+    under_test.stop_thread()
 
 
 def test_update_job_status():
@@ -57,6 +60,7 @@ def test_update_job_status():
     under_test.update_workers()
     assert len(under_test.list_jobs()) == 1
     assert under_test.get_job(job_id).job_id == job_id
+    under_test.stop_thread()
 
 
 def test_update_command_status():
@@ -70,3 +74,4 @@ def test_update_command_status():
     under_test.update_workers()
     assert len(under_test.list_commands()) == 1
     assert under_test.get_command(command_id).command_id == command_id
+    under_test.stop_thread()

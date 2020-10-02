@@ -11,9 +11,9 @@ class WorkerState(Enum):
 
 class WorkerStatus(object):
     def __init__(self, service_id: str):
-        self.last_update = datetime.min
-        self.service_id = service_id
-        self.state = WorkerState.UNAVAILABLE
+        self._last_update = datetime.now()
+        self._service_id = service_id
+        self._state = WorkerState.UNAVAILABLE
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, WorkerStatus):
@@ -27,5 +27,23 @@ class WorkerStatus(object):
                     self.service_id, new_status.service_id
                 )
             )
-        self.last_update = new_status.last_update
-        self.state = new_status.state
+        self._state = new_status.state
+        self._last_update = new_status.last_update
+
+    @property
+    def state(self) -> WorkerState:
+        return self._state
+
+    @property
+    def service_id(self) -> str:
+        return self._service_id
+
+    @property
+    def last_update(self) -> datetime:
+        return self._last_update
+
+    @state.setter
+    def state(self, new_state: WorkerState):
+        self._last_update = datetime.now()
+        self._state = new_state
+

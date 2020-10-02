@@ -13,11 +13,11 @@ class CommandState(Enum):
 
 class CommandStatus(object):
     def __init__(self, job_id: str, command_id: str):
-        self.job_id = job_id
-        self.command_id = command_id
-        self.last_update = datetime.now()
-        self.state = CommandState.NO_COMMAND
-        self.error_message = ""
+        self._job_id = job_id
+        self._command_id = command_id
+        self._last_update = datetime.now()
+        self._state = CommandState.NO_COMMAND
+        self._message = ""
 
     def __eq__(self, other):
         if not isinstance(other, CommandStatus):
@@ -35,7 +35,38 @@ class CommandStatus(object):
                     self.command_id, new_status.command_id
                 )
             )
-        self.state = new_status.state
-        if len(new_status.error_message) != 0:
-            self.error_message = new_status.error_message
-        self.last_update = new_status.last_update
+        self._state = new_status.state
+        if new_status.message:
+            self._message = new_status.error_message
+        self._last_update = new_status.last_update
+
+    @property
+    def job_id(self) -> str:
+        return self._job_id
+
+    @property
+    def command_id(self) -> str:
+        return self._command_id
+
+    @property
+    def message(self) -> str:
+        return self._message
+
+    @message.setter
+    def message(self, new_message: str):
+        if new_message:
+            self._message = new_message
+            self._last_update = datetime.now()
+
+    @property
+    def state(self) -> CommandState:
+        return self._state
+
+    @state.setter
+    def state(self, new_state: CommandState):
+        self._state = new_state
+        self._last_update = datetime.now()
+
+    @property
+    def last_update(self) -> datetime:
+        return self._last_update
