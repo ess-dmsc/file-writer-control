@@ -2,15 +2,18 @@ from queue import Queue
 from streaming_data_types.status_x5f2 import FILE_IDENTIFIER as STAT_IDENTIFIER
 from streaming_data_types.run_start_pl72 import FILE_IDENTIFIER as START_IDENTIFIER
 from streaming_data_types.run_stop_6s4t import FILE_IDENTIFIER as STOP_TIME_IDENTIFIER
+from streaming_data_types.finished_writing_wrdn import FILE_IDENTIFIER as STOPPED_IDENTIFIER
 from datetime import datetime, timedelta
 from streaming_data_types.utils import _get_schema
 from streaming_data_types import deserialise_x5f2 as deserialise_status
 from streaming_data_types import deserialise_answ as deserialise_answer
 from streaming_data_types import deserialise_6s4t as deserialise_stop_time
 from streaming_data_types import deserialise_pl72 as deserialise_start
+from streaming_data_types import deserialise_wrdn as deserialise_stopped
 from streaming_data_types.run_stop_6s4t import RunStopInfo
 from streaming_data_types.run_start_pl72 import RunStartInfo
 from streaming_data_types.status_x5f2 import StatusMessage
+from streaming_data_types.finished_writing_wrdn import WritingFinished
 from streaming_data_types.action_response_answ import FILE_IDENTIFIER as ANSW_IDENTIFIER
 from file_writer_control.JobStatus import JobStatus, JobState
 from file_writer_control.CommandStatus import CommandStatus, CommandState
@@ -22,6 +25,7 @@ from file_writer_control.StateExtractor import (
 )
 import json
 from streaming_data_types.action_response_answ import Response
+from typing import Dict
 
 STATUS_MESSAGE_TIMEOUT = timedelta(seconds=5)
 JOB_STATUS_TIMEOUT = timedelta(seconds=5)
@@ -31,9 +35,9 @@ COMMAND_STATUS_TIMEOUT = timedelta(seconds=20)
 class InThreadStatusTracker:
     def __init__(self, status_queue: Queue):
         self.queue = status_queue
-        self.known_workers = {}
-        self.known_jobs = {}
-        self.known_commands = {}
+        self.known_workers: Dict[str, WorkerStatus] = {}
+        self.known_jobs: Dict[str, JobStatus] = {}
+        self.known_commands: Dict[str, CommandStatus] = {}
 
     def process_message(self, message: bytes):
         current_schema = _get_schema(message).encode("utf-8")
@@ -46,6 +50,8 @@ class InThreadStatusTracker:
             self.process_set_stop_time(deserialise_stop_time(message))
         elif current_schema == START_IDENTIFIER:
             self.process_start(deserialise_start(message))
+        elif current_schema == STOPPED_IDENTIFIER:
+            self.process_stopped(deserialise_stopped(message))
         self.send_status_if_updated(update_time)
 
     def send_status_if_updated(self, limit_time: datetime):
@@ -119,4 +125,14 @@ class InThreadStatusTracker:
         self.check_for_command_presence(start.job_id, start.job_id)
         self.known_commands[start.command_id].state = CommandState.WAITING_RESPONSE
 
+    def process_stopped(self, stopped: WritingFinished):
+        self.check_for_job_presence(stopped.job_id)
+        self.check_for_worker_presence(stopped.service_id)
+        current_job = self.known_jobs[stopped.job_id]
+        if stopped.error_encountered:
+            current_job.state = JobState.ERROR
+        else:
+            current_job.state = JobState.DONE
+        current_job.message = stopped.message
+        self.known_workers[stopped.service_id].state = WorkerState.IDLE
 
