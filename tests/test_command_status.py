@@ -1,6 +1,14 @@
-from file_writer_control.CommandStatus import CommandStatus
+from file_writer_control.CommandStatus import CommandStatus, CommandState
 import pytest
 
+
+def test_init():
+    job_id = "some job id"
+    command_id = "some command id"
+    under_test1 = CommandStatus(job_id=job_id, command_id=command_id)
+    assert under_test1.job_id == job_id
+    assert under_test1.command_id == command_id
+    assert under_test1.state == CommandState.NO_COMMAND
 
 def test_eq_exception():
     under_test1 = CommandStatus("job_id", "command_id")
@@ -37,3 +45,33 @@ def test_update_success():
     under_test1 = CommandStatus("job_id1", "command_id1")
     under_test2 = CommandStatus("job_id1", "command_id1")
     under_test2.update_status(under_test1)  # No exception
+
+
+def test_update_message():
+    under_test1 = CommandStatus("job_id1", "command_id1")
+    under_test2 = CommandStatus("job_id1", "command_id1")
+    test_msg = "some test message"
+    under_test1.message = test_msg
+    assert under_test2.message == ""
+    under_test2.update_status(under_test1)  # No exception
+    assert under_test2.message == test_msg
+
+
+def test_set_message():
+    under_test1 = CommandStatus("job_id1", "command_id1")
+    last_update = under_test1.last_update
+    test_msg = "some test message"
+    assert under_test1.message == ""
+    under_test1.message = test_msg
+    assert under_test1.message == test_msg
+    assert under_test1.last_update != last_update
+
+
+def test_set_state():
+    under_test1 = CommandStatus("job_id1", "command_id1")
+    last_update = under_test1.last_update
+    test_state = CommandState.SUCCESS
+    assert under_test1.state == CommandState.NO_COMMAND
+    under_test1.state = test_state
+    assert under_test1.state == test_state
+    assert under_test1.last_update != last_update

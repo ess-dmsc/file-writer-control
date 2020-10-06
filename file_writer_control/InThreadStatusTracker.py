@@ -137,7 +137,9 @@ class InThreadStatusTracker:
         self.check_for_worker_presence(answer.service_id)
         self.check_for_job_presence(answer.job_id)
         self.check_for_command_presence(answer.job_id, answer.command_id)
-        self.known_jobs[answer.job_id].state = extract_job_state_from_answer(answer)
+        new_job_state = extract_job_state_from_answer(answer)
+        if new_job_state is not None:
+            self.known_jobs[answer.job_id].state = new_job_state
         self.known_commands[answer.command_id].state = extract_state_from_command_answer(answer)
         self.known_commands[answer.command_id].message = answer.message
         self.known_jobs[answer.job_id].message = answer.message

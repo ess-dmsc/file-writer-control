@@ -1,4 +1,4 @@
-from file_writer_control.WorkerStatus import WorkerStatus
+from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
 import pytest
 
 
@@ -30,4 +30,13 @@ def test_update_status_wrong_id():
 def test_update_status_ok():
     under_test1 = WorkerStatus("some_id")
     under_test2 = WorkerStatus("some_id")
+    last_update = under_test1.last_update
     under_test1.update_status(under_test2)  # No throw
+    assert last_update != under_test1.last_update
+
+
+def test_state_change_date_change():
+    under_test1 = WorkerStatus("some_id")
+    last_update = under_test1.last_update
+    under_test1.state = WorkerState.WRITING
+    assert last_update != under_test1.last_update

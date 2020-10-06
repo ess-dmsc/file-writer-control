@@ -16,7 +16,7 @@ class CommandState(Enum):
 
 class CommandStatus(object):
     """
-
+    The status of a command.
     """
     def __init__(self, job_id: str, command_id: str):
         self._job_id = job_id
@@ -48,7 +48,7 @@ class CommandStatus(object):
             )
         self._state = new_status.state
         if new_status.message:
-            self._message = new_status.error_message
+            self._message = new_status.message
         self._last_update = new_status.last_update
 
     @property

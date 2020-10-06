@@ -75,3 +75,19 @@ def test_update_command_status():
     assert len(under_test.list_commands()) == 1
     assert under_test.get_command(command_id).command_id == command_id
     under_test.stop_thread()
+    del under_test
+
+
+def test_update_unknown_type():
+    under_test = CommandChannel("localhost:42/some_topic")
+    under_test.status_queue.put("some string")
+    assert len(under_test.list_commands()) == 0
+    assert len(under_test.list_jobs()) == 0
+    assert len(under_test.list_workers()) == 0
+    under_test.stop_thread()
+
+
+def test_stop_thread_twice():
+    under_test = CommandChannel("localhost:42/some_topic")
+    under_test.stop_thread()
+    under_test.stop_thread()  # No exception

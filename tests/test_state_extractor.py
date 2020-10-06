@@ -89,11 +89,11 @@ def test_get_job_state_from_answer_done():
         "service_id",
         "job_id",
         "command_id",
-        ActionType.HasStopped,
+        ActionType.SetStopTime,
         ActionOutcome.Success,
         "some message",
     )
-    assert extract_job_state_from_answer(answer) == JobState.DONE
+    assert extract_job_state_from_answer(answer) is None
 
 
 def test_get_job_state_from_answer_writing():
@@ -113,11 +113,11 @@ def test_get_job_state_from_answer_error_done():
         "service_id",
         "job_id",
         "command_id",
-        ActionType.HasStopped,
+        ActionType.SetStopTime,
         ActionOutcome.Failure,
         "some message",
     )
-    assert extract_job_state_from_answer(answer) == JobState.ERROR
+    assert extract_job_state_from_answer(answer) is None
 
 
 def test_get_job_state_from_answer_error_start():

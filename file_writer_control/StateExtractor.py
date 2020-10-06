@@ -8,6 +8,7 @@ from file_writer_control.CommandStatus import CommandState
 from file_writer_control.JobStatus import JobState
 from streaming_data_types.status_x5f2 import StatusMessage
 from file_writer_control.WorkerStatus import WorkerState
+from typing import Union
 
 
 def extract_worker_state_from_status(status: StatusMessage) -> WorkerState:
@@ -41,19 +42,15 @@ def extract_state_from_command_answer(answer: ActionResponse) -> CommandState:
         return CommandState.ERROR
 
 
-def extract_job_state_from_answer(answer: ActionResponse) -> JobState:
+def extract_job_state_from_answer(answer: ActionResponse) -> Union[JobState, None]:
     """
     Determine the file writing job state from a action response message.
     :param answer: The action (either "start a job" or "set top time") response from a file-writer.
-    :return: The extracted job state.
+    :return: The extracted job state, None if job state can not be determined from this answer.
     """
-    if answer.action == ActionType.HasStopped:
-        if answer.outcome == ActionOutcome.Success:
-            return JobState.DONE
-        else:
-            return JobState.ERROR
     if answer.action == ActionType.StartJob:
         if answer.outcome == ActionOutcome.Success:
             return JobState.WRITING
         else:
             return JobState.ERROR
+    return None

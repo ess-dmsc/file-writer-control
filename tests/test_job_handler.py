@@ -1,6 +1,6 @@
 from file_writer_control.JobHandler import JobHandler
 from file_writer_control.WriteJob import WriteJob
-from file_writer_control.JobStatus import JobStatus
+from file_writer_control.JobStatus import JobStatus, JobState
 from datetime import datetime
 from unittest.mock import Mock
 
@@ -100,3 +100,30 @@ def test_set_stop_now_with_id():
     worker_finder_mock.try_send_stop_now.assert_called_once_with(
         test_job_status.service_id, test_job.job_id
     )
+
+
+def test_is_not_done():
+    worker_finder_mock = Mock()
+    test_job = WriteJob("{}", "some_file_name", "some_broker", datetime.now())
+    test_job_status = JobStatus(test_job.job_id)
+    test_job_status.service_id = "some_service_id"
+    test_job_status.state = JobState.ERROR
+    worker_finder_mock.get_job_status.return_value = test_job_status
+    under_test = JobHandler(worker_finder_mock)
+    under_test.start_job(test_job)
+    assert not under_test.is_done()
+    worker_finder_mock.get_job_state.assert_called_once_with(test_job.job_id)
+
+
+def test_is_done():
+    worker_finder_mock = Mock()
+    test_job = WriteJob("{}", "some_file_name", "some_broker", datetime.now())
+    test_job_status = JobStatus(test_job.job_id)
+    test_job_status.service_id = "some_service_id"
+    test_job_status.state = JobState.DONE
+    worker_finder_mock.get_job_status.return_value = test_job_status
+    under_test = JobHandler(worker_finder_mock)
+    under_test.start_job(test_job)
+    assert not under_test.is_done()
+    worker_finder_mock.get_job_state.assert_called_once_with(test_job.job_id)
+
