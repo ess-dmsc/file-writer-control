@@ -64,7 +64,12 @@ class InThreadStatusTracker:
             self.process_start(deserialise_start(message))
         elif current_schema == STOPPED_IDENTIFIER:
             self.process_stopped(deserialise_stopped(message))
+        else:
+            self.process_unknown(message)
         self.send_status_if_updated(update_time)
+
+    def process_unknown(self, message: bytes):
+        pass  # Do nothing for now
 
     def send_status_if_updated(self, limit_time: datetime):
         """
@@ -176,7 +181,7 @@ class InThreadStatusTracker:
         """
         self.check_for_job_presence(start.job_id)
         self.check_for_command_presence(start.job_id, start.job_id)
-        self.known_commands[start.command_id].state = CommandState.WAITING_RESPONSE
+        self.known_commands[start.job_id].state = CommandState.WAITING_RESPONSE
 
     def process_stopped(self, stopped: WritingFinished):
         """
