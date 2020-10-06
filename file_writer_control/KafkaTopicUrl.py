@@ -2,6 +2,9 @@ import re
 
 
 class KafkaTopicUrl:
+    """
+    Class for extracting address, port and topic name from a Kafka topic url.
+    """
     test_regexp = re.compile(
         r"^(\s*(kafka://)?((([^/?#:]+)+)(:(\d+){1,5})?)/([a-zA-Z0-9._-]+)\s*)$"
     )

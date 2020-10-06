@@ -33,13 +33,25 @@ COMMAND_STATUS_TIMEOUT = timedelta(seconds=20)
 
 
 class InThreadStatusTracker:
+    """
+    Implements de-coding of flatbuffer messages and sends updates of worker, job and command state/status back to the
+    "main"-thread if there has been changes.
+    """
     def __init__(self, status_queue: Queue):
+        """
+        Constructor.
+        :param status_queue: The output queue to which state/status updates are pushed.
+        """
         self.queue = status_queue
         self.known_workers: Dict[str, WorkerStatus] = {}
         self.known_jobs: Dict[str, JobStatus] = {}
         self.known_commands: Dict[str, CommandStatus] = {}
 
     def process_message(self, message: bytes):
+        """
+        Process a binary message.
+        :param message: The binary message to be processed.
+        """
         current_schema = _get_schema(message).encode("utf-8")
         update_time = datetime.now()
         if current_schema == ANSW_IDENTIFIER:
@@ -55,6 +67,11 @@ class InThreadStatusTracker:
         self.send_status_if_updated(update_time)
 
     def send_status_if_updated(self, limit_time: datetime):
+        """
+        Sends status updates of workers, jobs and commands (to the status queue) if there has been any updates on or
+        after the limit_time.
+        :param limit_time: The cut-off time for deciding which updates should be sent to the status queue.
+        """
         for worker in self.known_workers.values():
             if worker.last_update >= limit_time:
                 self.queue.put(worker)
@@ -66,20 +83,38 @@ class InThreadStatusTracker:
                 self.queue.put(command)
 
     def check_for_worker_presence(self, service_id: str):
+        """
+        Check if a service_id is known and add it to a list of known ones if it is not.
+        :param service_id: The service identifier to look for.
+        """
         if service_id not in self.known_workers:
             self.known_workers[service_id] = WorkerStatus(service_id)
 
     def check_for_job_presence(self, job_id: str):
+        """
+        Check if a job identifier is known and add it to a list of known ones if it is not.
+        :param job_id: The job identifier to look for.
+        """
         if job_id not in self.known_jobs:
             new_job = JobStatus(job_id)
             self.known_jobs[job_id] = new_job
 
     def check_for_command_presence(self, job_id: str, command_id: str):
+        """
+        Check if a command identifier is known and add it to a list of known ones if it is not.
+        :param job_id: The job identifier of the command that we are looking for. (Only used if we need to add the
+        command.)
+        :param command_id: The command identifier to look for.
+        """
         if command_id not in self.known_commands:
             new_command = CommandStatus(job_id, command_id)
             self.known_commands[command_id] = new_command
 
     def check_for_lost_connections(self):
+        """
+        Check workers, commands and jobs for the last update time and change the state of these if a timeout has been
+        reached.
+        """
         now = datetime.now()
         for worker in self.known_workers.values():
             if (
@@ -95,6 +130,10 @@ class InThreadStatusTracker:
                 job.state = JobState.TIMEOUT
 
     def process_answer(self, answer: Response):
+        """
+        Update workers, jobs and commands based on information in a response message.
+        :param answer: The response/answer message to use for status updates.
+        """
         self.check_for_worker_presence(answer.service_id)
         self.check_for_job_presence(answer.job_id)
         self.check_for_command_presence(answer.job_id, answer.command_id)
@@ -104,6 +143,10 @@ class InThreadStatusTracker:
         self.known_jobs[answer.job_id].message = answer.message
 
     def process_status(self, status_update: StatusMessage):
+        """
+        Update workers and jobs based on information in a status message.
+        :param status_update: The status message to use for updates.
+        """
         self.check_for_worker_presence(status_update.service_id)
         current_state = extract_worker_state_from_status(status_update)
         self.known_workers[status_update.service_id].state = current_state
@@ -117,15 +160,27 @@ class InThreadStatusTracker:
                 pass  # Expected error, do nothing
 
     def process_set_stop_time(self, stop_time: RunStopInfo):
+        """
+        Update commands and jobs based on information in a "set stop time" message.
+        :param stop_time: The "stop" message to use for updates.
+        """
         self.check_for_command_presence(stop_time.job_id, stop_time.command_id)
         self.known_commands[stop_time.command_id].state = CommandState.WAITING_RESPONSE
 
     def process_start(self, start: RunStartInfo):
+        """
+        Update commands and jobs based on information in a "start" message.
+        :param start: The "start" message to use for updates.
+        """
         self.check_for_job_presence(start.job_id)
         self.check_for_command_presence(start.job_id, start.job_id)
         self.known_commands[start.command_id].state = CommandState.WAITING_RESPONSE
 
     def process_stopped(self, stopped: WritingFinished):
+        """
+        Update workers and jobs based on information in a "has stopped" message.
+        :param stopped: The "stopped" message to use for updates.
+        """
         self.check_for_job_presence(stopped.job_id)
         self.check_for_worker_presence(stopped.service_id)
         current_job = self.known_jobs[stopped.job_id]

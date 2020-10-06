@@ -3,6 +3,9 @@ from datetime import datetime
 
 
 class CommandState(Enum):
+    """
+    The state of a command.
+    """
     UNKNOWN = auto()
     NO_COMMAND = auto()
     WAITING_RESPONSE = auto()
@@ -12,6 +15,9 @@ class CommandState(Enum):
 
 
 class CommandStatus(object):
+    """
+
+    """
     def __init__(self, job_id: str, command_id: str):
         self._job_id = job_id
         self._command_id = command_id
@@ -29,6 +35,11 @@ class CommandStatus(object):
         )
 
     def update_status(self, new_status):
+        """
+        Updates the status/state of this instance of the CommandStatus class using another instance.
+        .. note:: The command identifier of both this instance and the other one must be identical.
+        :param new_status: The other instance of the CommandStatus class.
+        """
         if new_status.command_id != self.command_id:
             raise RuntimeError(
                 "Command id of status update is not correct ({} vs {})".format(
@@ -42,14 +53,24 @@ class CommandStatus(object):
 
     @property
     def job_id(self) -> str:
+        """
+        The job identifier under which this command is executed.
+        """
         return self._job_id
 
     @property
     def command_id(self) -> str:
+        """
+        The unique command identifier of this command.
+        """
         return self._command_id
 
     @property
     def message(self) -> str:
+        """
+        A status/error message as returned by the file-writer that responded to the command.
+        :return:
+        """
         return self._message
 
     @message.setter
@@ -60,6 +81,9 @@ class CommandStatus(object):
 
     @property
     def state(self) -> CommandState:
+        """
+        The current state of the command.
+        """
         return self._state
 
     @state.setter
@@ -69,4 +93,7 @@ class CommandStatus(object):
 
     @property
     def last_update(self) -> datetime:
+        """
+        The local time stamp of the last update of the status of the command.
+        """
         return self._last_update

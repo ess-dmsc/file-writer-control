@@ -1,17 +1,21 @@
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.WorkerFinder import WorkerFinder
 from file_writer_control.WriteJob import WriteJob
-from file_writer_control.WorkerStatus import WorkerState
+from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
 from file_writer_control.JobStatus import JobState
 from random import randrange
 import threading
 import time
+from typing import List
 
 START_JOB_TIMEOUT = 30  # Seconds
 SEND_JOB_TIMEOUT = 10  # Seconds
 
 
 class WorkerCommandChannel(WorkerFinder):
+    """
+    A child of WorkerFinder intended for use with "direct command" style of starting a file-writing job.
+    """
     def __init__(self, command_topic_url: str):
         super().__init__(command_topic_url)
         self.start_job_threads = []
@@ -23,17 +27,27 @@ class WorkerCommandChannel(WorkerFinder):
             thread.join()
 
     def try_start_job(self, job: WriteJob) -> CommandHandler:
-        thread_kwargs = {"do_job": job, "stop_event":self._stop_event}
+        """
+        Attempt to start a file-writing job by finding an available (idle) worker and sending it a write command.
+        Will re-try to send a write command until a timeout has been reached. This member function is not blocking.
+        :param job: The job to be started.
+        :return: A CommandHandler for (more) easily checking the outcome of the start command.
+        """
+        thread_kwargs = {"do_job": job, "stop_event": self._stop_event}
         self.command_channel.add_job_id(job.job_id)
         self.command_channel.add_command_id(job.job_id, job.job_id)
         temp_thread = threading.Thread(
-            target=self.start_job_thread_function, daemon=True, kwargs=thread_kwargs
+            target=self._start_job_thread_function, daemon=True, kwargs=thread_kwargs
         )
         temp_thread.start()
         self.start_job_threads.append(temp_thread)
         return CommandHandler(self.command_channel, job.job_id)
 
-    def get_idle_workers(self):
+    def get_idle_workers(self) -> List[WorkerStatus]:
+        """
+        Get a list of workers that has the (known) state idle. May be an empty list. Idle status may be outdated.
+        :return: List of workers.
+        """
         list_of_workers = self.list_known_workers()
         list_of_idle_workers = []
         for worker in list_of_workers:
@@ -41,7 +55,12 @@ class WorkerCommandChannel(WorkerFinder):
                 list_of_idle_workers.append(worker)
         return list_of_idle_workers
 
-    def start_job_thread_function(self, do_job: WriteJob, stop_event: threading.Event):
+    def _start_job_thread_function(self, do_job: WriteJob, stop_event: threading.Event):
+        """
+        Attempt to find an idle worker (file-writer) and give it a file-writing job.
+        :param do_job: The write job to start.
+        :param stop_event: Used for stopping the thread before it has finished by itself.
+        """
         job_started_time = start_time = time.time()
 
         waiting_to_send_job = True

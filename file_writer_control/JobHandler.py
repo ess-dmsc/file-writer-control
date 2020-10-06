@@ -7,27 +7,58 @@ from typing import Union
 
 
 class JobHandler:
+    """
+    A stand in for controlling and checking the state of a job running on a file-writer instance.
+    """
     def __init__(self, worker_finder: WorkerFinder):
+        """
+        Constructor.
+        :param worker_finder: An instance of a class that inherits from WorkerFinder and implements the member function
+        try_start_job of that class.
+        """
         self.worker_finder = worker_finder
         self.job_id = ""
 
     def start_job(self, job: WriteJob) -> CommandHandler:
+        """
+        Start a write job. This call is not blocking. It does not guarantee that the write job will actually be started.
+        :param job: The write to be started.
+        :return: A CommandHandler instance that can be used to monitor the outcome of the attempt to start a write job.
+        """
         self.job_id = job.job_id
         return self.worker_finder.try_start_job(job)
 
     def get_state(self) -> JobState:
+        """
+        Get the state of the job.
+        """
         return self.worker_finder.get_job_state(self.job_id)
 
-    def is_done(self):
+    def is_done(self) -> bool:
+        """
+        :return: True if job was completed without errors. False otherwise.
+        .. note:: If the job was completed with errors, this call will return False.
+        """
         return self.worker_finder.get_job_state(self.job_id) == JobState.DONE
 
     def get_error_string(self) -> str:
+        """
+        Get a string describing the error that was encountered when running the job. (If there was an error.)
+        """
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return ""
         return current_status.error_message
 
     def set_stop_time(self, stop_time: datetime) -> Union[CommandHandler, None]:
+        """
+        Set a new stop time for the file-writing job. There is no guarantee that the stop time will actually be changed.
+        This call is not blocking. Calling this member function will have no effect on the stop-time before the write
+        job has started.
+
+        :param stop_time: The new stop time of the job.
+        :return: A CommandHandler instance that can be used to monitor the outcome of the attempt to set a new stop time.
+        """
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return None
@@ -36,6 +67,13 @@ class JobHandler:
         )
 
     def stop_now(self) -> Union[CommandHandler, None]:
+        """
+        Tell the file-writing to stop writing NOW. There is no guarantee that will actually happen though.
+        This call is not blocking. Calling this member function will have no effect if done before a write job has
+        actually started.
+
+        :return: A CommandHandler instance that can be used to monitor the outcome of the attempt to set a new stop time.
+        """
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return None
