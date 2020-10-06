@@ -3,6 +3,9 @@ from enum import Enum, auto
 
 
 class WorkerState(Enum):
+    """
+    The state of a worker (i.e. a file-writer instance).
+    """
     IDLE = auto()
     WRITING = auto()
     UNKNOWN = auto()
