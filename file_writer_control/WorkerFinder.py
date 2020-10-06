@@ -12,15 +12,14 @@ from streaming_data_types.run_stop_6s4t import serialise_6s4t as serialise_stop
 from file_writer_control.CommandId import generate_command_id
 
 
-class WorkerFinder:
-    def __init__(self, command_topic_url: str):
+class WorkerFinderBase:
+    def __init__(self, command_topic: str, command_channel: CommandChannel, message_producer: KafkaProducer):
         """
-        :param command_topic_url:
+        Constructor.
         """
-        self.command_channel = CommandChannel(command_topic_url)
-        command_url = KafkaTopicUrl(command_topic_url)
-        self.command_topic = command_url.topic
-        self.message_producer = KafkaProducer(bootstrap_servers=[command_url.host_port])
+        self.command_channel = command_channel
+        self.command_topic = command_topic
+        self.message_producer = message_producer
 
     def send_command(self, message: bytes):
         """
@@ -52,7 +51,7 @@ class WorkerFinder:
         """
         command_id = generate_command_id("STOP_TIME")
         message = serialise_stop(
-            job_id, "some_name", service_id, command_id, int(stop_time.timestamp() * 1000)
+            job_id=job_id, service_id=service_id, command_id=command_id, stop_time=int(stop_time.timestamp() * 1000)
         )
         self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
         self.send_command(message)
@@ -108,3 +107,12 @@ class WorkerFinder:
         :return: The status of the job if known. None if it is not.
         """
         return self.command_channel.get_job(job_id)
+
+
+class WorkerFinder(WorkerFinderBase):
+    def __init__(self, command_topic_url: str):
+        temp_cmd_ch = CommandChannel(command_topic_url)
+        command_url = KafkaTopicUrl(command_topic_url)
+        temp_producer = KafkaProducer(bootstrap_servers=[command_url.host_port])
+        super().__init__(command_url.topic, temp_cmd_ch, temp_producer)
+
