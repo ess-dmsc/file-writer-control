@@ -146,10 +146,10 @@ class CommandChannel(object):
             if worker.last_update + STATUS_MESSAGE_TIMEOUT < now:
                 worker.state = WorkerState.UNAVAILABLE
         for job in self.map_of_jobs.values():
-            if job.last_update + JOB_STATUS_TIMEOUT < now:
+            if job.last_update + JOB_STATUS_TIMEOUT < now and not (job.state == JobState.DONE or job.state == JobState.ERROR):
                 job.state = JobState.TIMEOUT
         for command in self.map_of_commands.values():
-            if command.last_update + COMMAND_STATUS_TIMEOUT < now:
+            if command.last_update + COMMAND_STATUS_TIMEOUT < now and not (command.state == CommandState.SUCCESS or command.state == CommandState.ERROR):
                 command.state = CommandState.TIMEOUT_RESPONSE
 
     def list_workers(self) -> List[WorkerStatus]:
