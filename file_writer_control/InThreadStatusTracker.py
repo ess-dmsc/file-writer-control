@@ -130,7 +130,7 @@ class InThreadStatusTracker:
         for command in self.known_commands.values():
             if command.state != CommandState.SUCCESS and command.state != CommandState.ERROR and now - command.last_update > COMMAND_STATUS_TIMEOUT:
                 command.state = CommandState.TIMEOUT_RESPONSE
-        for job in self.known_jobs:
+        for job in self.known_jobs.values():
             if job.state != JobState.DONE and job.state != JobState.ERROR and now - job.last_update > JOB_STATUS_TIMEOUT:
                 job.state = JobState.TIMEOUT
 
