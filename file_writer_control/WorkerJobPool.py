@@ -3,6 +3,7 @@ from file_writer_control.WriteJob import WriteJob
 from kafka import KafkaProducer
 from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 from file_writer_control.CommandHandler import CommandHandler
+from file_writer_control.CommandStatus import CommandState
 
 
 class WorkerJobPool(WorkerFinder):
@@ -32,5 +33,6 @@ class WorkerJobPool(WorkerFinder):
         See base class for documentation.
         """
         self.command_channel.add_command_id(job.job_id, job.job_id)
+        self.command_channel.get_command(job.job_id).state = CommandState.WAITING_RESPONSE
         self.send_pool_message(job.get_start_message())
         return CommandHandler(self.command_channel, job.job_id)

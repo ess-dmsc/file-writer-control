@@ -3,14 +3,16 @@ from queue import Queue
 from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
-from typing import List, Union
+from typing import List, Union, Dict
 import atexit
+from datetime import datetime
 
 from file_writer_control.InThreadStatusTracker import InThreadStatusTracker
-from file_writer_control.WorkerStatus import WorkerStatus
+from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
 
-from file_writer_control.JobStatus import JobStatus
-from file_writer_control.CommandStatus import CommandStatus
+from file_writer_control.JobStatus import JobStatus, JobState
+from file_writer_control.CommandStatus import CommandStatus, CommandState
+from file_writer_control.InThreadStatusTracker import STATUS_MESSAGE_TIMEOUT, COMMAND_STATUS_TIMEOUT, JOB_STATUS_TIMEOUT
 
 
 def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queue):
@@ -68,9 +70,9 @@ class CommandChannel(object):
             "in_queue": self.to_thread_queue,
             "out_queue": self.status_queue,
         }
-        self.map_of_workers = {}
-        self.map_of_jobs = {}
-        self.map_of_commands = {}
+        self.map_of_workers: Dict[str, WorkerStatus] = {}
+        self.map_of_jobs: Dict[str, JobStatus] = {}
+        self.map_of_commands: Dict[str, CommandStatus] = {}
         self.run_thread = True
         self.thread = threading.Thread(
             target=thread_function, daemon=True, kwargs=thread_kwargs
@@ -139,6 +141,16 @@ class CommandChannel(object):
                 )
             else:
                 pass
+        now = datetime.now()
+        for worker in self.map_of_workers.values():
+            if worker.last_update + STATUS_MESSAGE_TIMEOUT < now:
+                worker.state = WorkerState.UNAVAILABLE
+        for job in self.map_of_jobs.values():
+            if job.last_update + JOB_STATUS_TIMEOUT < now:
+                job.state = JobState.TIMEOUT
+        for command in self.map_of_commands.values():
+            if command.last_update + COMMAND_STATUS_TIMEOUT < now:
+                command.state = CommandState.TIMEOUT_RESPONSE
 
     def list_workers(self) -> List[WorkerStatus]:
         """
@@ -167,6 +179,7 @@ class CommandChannel(object):
         :param job_id: The job identifier of the job we are interested in.
         :return: The job status or None if the job is not known.
         """
+        self.update_workers()
         if job_id in self.map_of_jobs:
             return self.map_of_jobs[job_id]
         return None
@@ -177,6 +190,7 @@ class CommandChannel(object):
         :param service_id: The service identifier of the worker we are interested in.
         :return: The worker status or None if the service id is not known.
         """
+        self.update_workers()
         if service_id in self.map_of_workers:
             return self.map_of_workers[service_id]
         return None
@@ -187,6 +201,7 @@ class CommandChannel(object):
         :param command_id: The command identifier of the command we are interested in.
         :return: The command status/outcome or None if the command is not known.
         """
+        self.update_workers()
         if command_id in self.map_of_commands:
             return self.map_of_commands[command_id]
         return None
