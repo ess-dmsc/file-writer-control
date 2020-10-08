@@ -31,7 +31,7 @@ class CommandHandler:
         """
         return self.command_channel.get_command(self.command_id).state == CommandState.SUCCESS
 
-    def get_error_string(self) -> str:
+    def get_message(self) -> str:
         """
         :return: If there was an error executing the command, this member function will return the error string as
         sent by the file-writer. Will return an empty string otherwise.
@@ -39,4 +39,4 @@ class CommandHandler:
         command = self.command_channel.get_command(self.command_id)
         if command is None:
             return ""
-        return command.error_message
+        return command.message

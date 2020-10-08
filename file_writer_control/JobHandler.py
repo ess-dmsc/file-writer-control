@@ -41,14 +41,14 @@ class JobHandler:
         """
         return self.worker_finder.get_job_state(self.job_id) == JobState.DONE
 
-    def get_error_string(self) -> str:
+    def get_message(self) -> str:
         """
         Get a string describing the error that was encountered when running the job. (If there was an error.)
         """
         current_status = self.worker_finder.get_job_status(self.job_id)
         if current_status is None:
             return ""
-        return current_status.error_message
+        return current_status.message
 
     def set_stop_time(self, stop_time: datetime) -> Union[CommandHandler, None]:
         """
