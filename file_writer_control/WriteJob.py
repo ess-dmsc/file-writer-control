@@ -27,7 +27,8 @@ class WriteJob:
         start_time: datetime,
         stop_time: datetime = datetime.max - timedelta(days=365),
         instrument_name: str = "",
-        run_name: str = ""
+        run_name: str = "",
+        metadata: str = ""
     ):
         self.structure = nexus_structure
         self.file = file_name
@@ -38,6 +39,7 @@ class WriteJob:
         self.broker = broker
         self.instrument_name = instrument_name
         self.run_name = run_name
+        self.metadata = metadata
 
     def generate_new_job_id(self):
         """
@@ -72,5 +74,6 @@ class WriteJob:
             service_id=self.service_id,
             broker=self.broker,
             instrument_name=self.instrument_name,
-            run_name=self.run_name
+            run_name=self.run_name,
+            metadata=self.metadata
         )

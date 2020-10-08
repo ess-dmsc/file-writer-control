@@ -28,7 +28,7 @@ def test_get_error_no_id():
     mock_cmd_ch.get_command.return_value = None
     cmd_id = "some_command_id"
     under_test = CommandHandler(mock_cmd_ch, cmd_id)
-    assert under_test.get_error_string() == ""
+    assert under_test.get_message() == ""
     mock_cmd_ch.get_command.assert_called_once_with(cmd_id)
 
 
@@ -38,10 +38,10 @@ def test_get_error_with_id():
     cmd_id = "some_command_id"
     message_string = "some message"
     stand_in_status = CommandStatus(job_id, cmd_id)
-    stand_in_status.error_message = message_string
+    stand_in_status.message = message_string
     mock_cmd_ch.get_command.return_value = stand_in_status
     under_test = CommandHandler(mock_cmd_ch, cmd_id)
-    assert under_test.get_error_string() == message_string
+    assert under_test.get_message() == message_string
     mock_cmd_ch.get_command.assert_called_once_with(cmd_id)
 
 

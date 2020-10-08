@@ -292,7 +292,8 @@ def test_process_start():
         nexus_structure="nxs structure",
         service_id=service_id,
         instrument_name="instrument name",
-        broker="broker"
+        broker="broker",
+        metadata="{}"
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -327,3 +328,6 @@ def test_process_set_stop_time():
     command_status = status_queue.get()
     assert status_queue.empty()
     assert command_status.state == CommandState.WAITING_RESPONSE
+
+def test_worker_lost_connection():
+    pass
