@@ -25,7 +25,7 @@ class WriteJob:
         file_name: str,
         broker: str,
         start_time: datetime,
-        stop_time: datetime = datetime.max - timedelta(days=365),
+        stop_time: datetime = None,
         instrument_name: str = "",
         run_name: str = "",
         metadata: str = ""
@@ -34,7 +34,10 @@ class WriteJob:
         self.file = file_name
         self.job_id = generate_job_id()
         self.start = start_time
-        self.stop = stop_time
+        if stop_time is None:
+            self.stop = self.start + timedelta(days=365.25*10)
+        else:
+            self.stop = stop_time
         self._service_id = ""
         self.broker = broker
         self.instrument_name = instrument_name
