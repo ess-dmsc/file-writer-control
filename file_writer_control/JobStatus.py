@@ -26,7 +26,7 @@ class JobStatus:
         self._state = JobState.WAITING
         self._message = ""
 
-    def update_status(self, new_status) -> None:
+    def update_status(self, new_status: 'JobStatus') -> None:
         """
         Updates the status/state of a this instance of the JobStatus class, using another instance.
         .. note:: The job identifier of this instance and the other must be identical.
