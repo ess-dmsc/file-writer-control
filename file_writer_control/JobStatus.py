@@ -26,7 +26,7 @@ class JobStatus:
         self._state = JobState.WAITING
         self._message = ""
 
-    def update_status(self, new_status):
+    def update_status(self, new_status) -> None:
         """
         Updates the status/state of a this instance of the JobStatus class, using another instance.
         .. note:: The job identifier of this instance and the other must be identical.
@@ -34,10 +34,7 @@ class JobStatus:
         """
         if new_status.job_id != self.job_id:
             raise RuntimeError(
-                "Job id of status update is not correct ({} vs {})".format(
-                    self.job_id, new_status.job_id
-                )
-            )
+                f"Job id of status update is not correct ({self.job_id} vs {new_status.job_id})")
         self._state = new_status.state
         if new_status.message:
             self._message = new_status.message
@@ -59,7 +56,7 @@ class JobStatus:
         return self._service_id
 
     @service_id.setter
-    def service_id(self, new_service_id: str):
+    def service_id(self, new_service_id: str) -> None:
         if not self._service_id:
             self._service_id = new_service_id
             self._last_update = datetime.now()
@@ -83,7 +80,7 @@ class JobStatus:
         return self._state
 
     @state.setter
-    def state(self, new_state: JobState):
+    def state(self, new_state: JobState) -> None:
         self._state = new_state
         self._last_update = datetime.now()
 
@@ -95,7 +92,7 @@ class JobStatus:
         return self._message
 
     @message.setter
-    def message(self, new_message: str):
+    def message(self, new_message: str) -> None:
         if new_message:
             self._message = new_message
             self._last_update = datetime.now()
