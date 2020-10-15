@@ -10,6 +10,7 @@ def test_init():
     assert under_test1.command_id == command_id
     assert under_test1.state == CommandState.NO_COMMAND
 
+
 def test_eq_exception():
     under_test1 = CommandStatus("job_id", "command_id")
     with pytest.raises(NotImplementedError):
