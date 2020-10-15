@@ -25,7 +25,7 @@ class CommandStatus(object):
         self._state = CommandState.NO_COMMAND
         self._message = ""
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'CommandStatus'):
         if not isinstance(other, CommandStatus):
             raise NotImplementedError
         return (
