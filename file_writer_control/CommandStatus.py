@@ -25,13 +25,13 @@ class CommandStatus(object):
         self._state = CommandState.NO_COMMAND
         self._message = ""
 
-    def __eq__(self, other: 'CommandStatus'):
-        if not isinstance(other, CommandStatus):
+    def __eq__(self, other_status: 'CommandStatus'):
+        if not isinstance(other_status, CommandStatus):
             raise NotImplementedError
         return (
-            other.command_id == self.command_id
-            and other.job_id == self.job_id
-            and other.state == self.state
+            other_status.command_id == self.command_id
+            and other_status.job_id == self.job_id
+            and other_status.state == self.state
         )
 
     def update_status(self, new_status: 'CommandStatus'):
