@@ -6,6 +6,7 @@ class WorkerState(Enum):
     """
     The state of a worker (i.e. a file-writer instance).
     """
+
     IDLE = auto()
     WRITING = auto()
     UNKNOWN = auto()
@@ -16,17 +17,21 @@ class WorkerStatus(object):
     """
     Contains general status information about a worker.
     """
+
     def __init__(self, service_id: str):
         self._last_update = datetime.now()
         self._service_id = service_id
         self._state = WorkerState.UNAVAILABLE
 
-    def __eq__(self, other_status: 'WorkerStatus') -> bool:
+    def __eq__(self, other_status: "WorkerStatus") -> bool:
         if not isinstance(other_status, WorkerStatus):
             raise NotImplementedError
-        return self.service_id == other_status.service_id and self.state == other_status.state
+        return (
+            self.service_id == other_status.service_id
+            and self.state == other_status.state
+        )
 
-    def update_status(self, new_status: 'WorkerStatus'):
+    def update_status(self, new_status: "WorkerStatus"):
         """
         Updates the status/state of this instance of the WorkerStatus class using another instance.
         .. note:: The service identifier of both this instance and the other one must be identical.
@@ -34,9 +39,7 @@ class WorkerStatus(object):
         """
         if new_status.service_id != self.service_id:
             raise RuntimeError(
-                "Service id of status update is not correct ({} vs {})".format(
-                    self.service_id, new_status.service_id
-                )
+                f"Service id of status update is not correct ({self.service_id} vs {new_status.service_id})"
             )
         self._state = new_status.state
         self._last_update = new_status.last_update
@@ -67,4 +70,3 @@ class WorkerStatus(object):
     def state(self, new_state: WorkerState):
         self._last_update = datetime.now()
         self._state = new_state
-
