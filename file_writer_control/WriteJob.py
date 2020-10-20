@@ -8,9 +8,8 @@ from random import randint
 
 def generate_job_id() -> str:
     timestamp = int(datetime.now().timestamp())
-    timestamp_str = "{:08X}".format(timestamp ^ 0xFFFFFFFF)
-    partial_id = "{}-{}-{}-{}-".format(
-        platform.node(), os.getpid(), timestamp_str, "{:04X}".format(randint(0, 65535))
+    partial_id = "{:s}-{:d}-{:08X}-{:04X}-".format(
+        platform.node(), os.getpid(), timestamp ^ 0xFFFFFFFF, randint(0, 65535)
     )
     return partial_id + "{:08X}".format(adler32(partial_id.encode()))
 
