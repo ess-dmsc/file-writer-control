@@ -13,7 +13,7 @@ class KafkaTopicUrl:
         result = re.match(KafkaTopicUrl.test_regexp, url)
         if result is None:
             raise RuntimeError("Unable to match kafka url.")
-        self.port = 9092
+        self.port = 9092 # Default Kafka broker port
         if result.group(7) is not None:
             self.port = int(result.group(7))
         self.host = result.group(4)
