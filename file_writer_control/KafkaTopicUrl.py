@@ -6,7 +6,7 @@ class KafkaTopicUrl:
     Class for extracting address, port and topic name from a Kafka topic url.
     """
     test_regexp = re.compile(
-        r"^(\s*(kafka://)?((([^/?#:]+)+)(:(\d+){1,5})?)/([a-zA-Z0-9._-]+)\s*)$"
+        r"^\s*(?:kafka://)?(?:(?P<host>[^/?#:]+)(?::(?P<port>\d+){1,5})?)/(?P<topic>[a-zA-Z0-9._-]+)\s*$"
     )
 
     def __init__(self, url: str):
@@ -14,8 +14,8 @@ class KafkaTopicUrl:
         if result is None:
             raise RuntimeError("Unable to match kafka url.")
         self.port = 9092
-        if result.group(7) is not None:
-            self.port = int(result.group(7))
-        self.host = result.group(4)
+        if result.group("port") is not None:
+            self.port = int(result.group("port"))
+        self.host = result.group("host")
         self.host_port = f"{self.host}:{self.port}"
-        self.topic = result.group(8)
+        self.topic = result.group("topic")
