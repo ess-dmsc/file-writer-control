@@ -13,9 +13,18 @@ from streaming_data_types.action_response_answ import (
     ActionType,
 )
 from datetime import datetime
+import pytest
 
 
-def test_get_worker_state_writing():
+@pytest.mark.parametrize(
+    "status_input,state",
+    [
+        ('{"state":"writing"}', WorkerState.WRITING),
+        ('{"state":"idle"}', WorkerState.IDLE),
+        ('{"state":"some_state"}', WorkerState.UNKNOWN),
+    ],
+)
+def test_get_worker_state(status_input, state):
     message = StatusMessage(
         "name",
         "version",
@@ -23,130 +32,51 @@ def test_get_worker_state_writing():
         "host_name",
         "process_id",
         update_interval=5,
-        status_json='{"state":"writing"}',
+        status_json=status_input,
     )
-    assert extract_worker_state_from_status(message) == WorkerState.WRITING
+    assert extract_worker_state_from_status(message) == state
 
 
-def test_get_worker_state_idle():
-    message = StatusMessage(
-        "name",
-        "version",
-        "service_id",
-        "host_name",
-        "process_id",
-        update_interval=5,
-        status_json='{"state":"idle"}',
-    )
-    assert extract_worker_state_from_status(message) == WorkerState.IDLE
-
-
-def test_get_worker_state_unknown():
-    message = StatusMessage(
-        "name",
-        "version",
-        "service_id",
-        "host_name",
-        "process_id",
-        update_interval=5,
-        status_json='{"state":"some_state"}',
-    )
-    assert extract_worker_state_from_status(message) == WorkerState.UNKNOWN
-
-
-def test_get_state_from_command_answer_success():
+@pytest.mark.parametrize(
+    "status_input,state",
+    [
+        (ActionOutcome.Success, CommandState.SUCCESS),
+        (ActionOutcome.Failure, CommandState.ERROR),
+        (12, CommandState.ERROR),
+    ],
+)
+def test_get_state_from_command_answer(status_input, state):
     answer = Response(
         "service_id",
         "job_id",
         "command_id",
         ActionType.SetStopTime,
-        ActionOutcome.Success,
+        status_input,
         "some message",
         1234,
         datetime.now(),
     )
-    assert extract_state_from_command_answer(answer) == CommandState.SUCCESS
+    assert extract_state_from_command_answer(answer) == state
 
 
-def test_get_state_from_command_answer_error():
+@pytest.mark.parametrize(
+    "action,outcome,state",
+    [
+        (ActionType.SetStopTime, ActionOutcome.Success, None),
+        (ActionType.StartJob, ActionOutcome.Success, JobState.WRITING),
+        (ActionType.SetStopTime, ActionOutcome.Failure, None),
+        (ActionType.StartJob, ActionOutcome.Failure, JobState.ERROR),
+    ],
+)
+def test_get_job_state_from_answer_done(action, outcome, state):
     answer = Response(
         "service_id",
         "job_id",
         "command_id",
-        ActionType.SetStopTime,
-        ActionOutcome.Failure,
+        action,
+        outcome,
         "some message",
         1234,
         datetime.now(),
     )
-    assert extract_state_from_command_answer(answer) == CommandState.ERROR
-
-
-def test_get_state_from_command_answer_unknown():
-    answer = Response(
-        "service_id",
-        "job_id",
-        "command_id",
-        ActionType.SetStopTime,
-        12,
-        "some message",
-        1234,
-        datetime.now(),
-    )
-    assert extract_state_from_command_answer(answer) == CommandState.ERROR
-
-
-def test_get_job_state_from_answer_done():
-    answer = Response(
-        "service_id",
-        "job_id",
-        "command_id",
-        ActionType.SetStopTime,
-        ActionOutcome.Success,
-        "some message",
-        1234,
-        datetime.now(),
-    )
-    assert extract_job_state_from_answer(answer) is None
-
-
-def test_get_job_state_from_answer_writing():
-    answer = Response(
-        "service_id",
-        "job_id",
-        "command_id",
-        ActionType.StartJob,
-        ActionOutcome.Success,
-        "some message",
-        1234,
-        datetime.now(),
-    )
-    assert extract_job_state_from_answer(answer) == JobState.WRITING
-
-
-def test_get_job_state_from_answer_error_done():
-    answer = Response(
-        "service_id",
-        "job_id",
-        "command_id",
-        ActionType.SetStopTime,
-        ActionOutcome.Failure,
-        "some message",
-        1234,
-        datetime.now(),
-    )
-    assert extract_job_state_from_answer(answer) is None
-
-
-def test_get_job_state_from_answer_error_start():
-    answer = Response(
-        "service_id",
-        "job_id",
-        "command_id",
-        ActionType.StartJob,
-        ActionOutcome.Failure,
-        "some message",
-        1234,
-        datetime.now(),
-    )
-    assert extract_job_state_from_answer(answer) == JobState.ERROR
+    assert extract_job_state_from_answer(answer) is state
