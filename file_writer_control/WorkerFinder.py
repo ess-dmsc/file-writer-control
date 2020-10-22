@@ -66,8 +66,7 @@ class WorkerFinderBase:
         :return: A CommandHandler instance for (more) easily checking the outcome of the "stop now" command.
         """
         command_id = generate_command_id("STOP_NOW")
-        message = serialise_stop(job_id=job_id, service_id=service_id, command_id=command_id, stop_time=0xAAAAAAAAAAAAAAAA)
-        message = message.replace(b'\xaa\xaa\xaa\xaa\xaa\xaa\xaa\xaa', b'\x00\x00\x00\x00\x00\x00\x00\x00')
+        message = serialise_stop(job_id=job_id, service_id=service_id, command_id=command_id, stop_time=0)
         self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
         self.send_command(message)
         return CommandHandler(self.command_channel, command_id)
