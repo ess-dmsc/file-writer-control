@@ -57,22 +57,21 @@ class InThreadStatusTracker:
         """
         current_schema = _get_schema(message).encode("utf-8")
         update_time = datetime.now()
-        if current_schema == ANSW_IDENTIFIER:
-            self.process_answer(deserialise_answer(message))
-        elif current_schema == STAT_IDENTIFIER:
-            self.process_status(deserialise_status(message))
-        elif current_schema == STOP_TIME_IDENTIFIER:
-            self.process_set_stop_time(deserialise_stop_time(message))
-        elif current_schema == START_IDENTIFIER:
-            self.process_start(deserialise_start(message))
-        elif current_schema == STOPPED_IDENTIFIER:
-            self.process_stopped(deserialise_stopped(message))
-        else:
-            self.process_unknown(message)
-        self.send_status_if_updated(update_time)
+        msg_process_map = {
+            ANSW_IDENTIFIER: lambda msg: self.process_answer(deserialise_answer(msg)),
+            STAT_IDENTIFIER: lambda msg: self.process_status(deserialise_status(msg)),
+            STOP_TIME_IDENTIFIER: lambda msg: self.process_set_stop_time(
+                deserialise_stop_time(msg)
+            ),
+            START_IDENTIFIER: lambda msg: self.process_start(deserialise_start(msg)),
+            STOPPED_IDENTIFIER: lambda msg: self.process_stopped(
+                deserialise_stopped(msg)
+            ),
+        }
+        if current_schema in msg_process_map:
+            msg_process_map[current_schema](message)
 
-    def process_unknown(self, message: bytes):
-        pass  # Do nothing for now
+        self.send_status_if_updated(update_time)
 
     def send_status_if_updated(self, limit_time: datetime):
         """
@@ -174,10 +173,12 @@ class InThreadStatusTracker:
             job_id = json.loads(status_update.status_json)["job_id"]
             self.check_for_job_presence(job_id)
             self.known_jobs[job_id].state = JobState.WRITING
+            # For some jobs, we will only know the service-id when a worker starts working on a job.
+            # Thus we need the following statement to update the (known) service-id of a job.
             try:
                 self.known_jobs[job_id].service_id = status_update.service_id
             except RuntimeError:
-                pass  # Expected error, do nothing
+                pass  # Expected error (i.e. the job is not known), do nothing
 
     def process_set_stop_time(self, stop_time: RunStopInfo):
         """
