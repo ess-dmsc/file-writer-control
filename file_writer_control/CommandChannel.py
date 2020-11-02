@@ -127,26 +127,31 @@ class CommandChannel(object):
         to execute if the queue of updates is long. This member function is called by many of the other member functions
         in this class.
         """
+
+        def handle_worker_status(status_update):
+            if status_update.service_id not in self.map_of_workers:
+                self.map_of_workers[status_update.service_id] = status_update
+            self.map_of_workers[status_update.service_id].update_status(status_update)
+
+        def handle_job_status(status_update):
+            if status_update.job_id not in self.map_of_jobs:
+                self.map_of_jobs[status_update.job_id] = status_update
+            self.map_of_jobs[status_update.job_id].update_status(status_update)
+
+        def handle_command_status(status_update):
+            if status_update.command_id not in self.map_of_commands:
+                self.map_of_commands[status_update.command_id] = status_update
+            self.map_of_commands[status_update.command_id].update_status(status_update)
+
+        status_updater_map = {
+            WorkerStatus: handle_worker_status,
+            CommandStatus: handle_command_status,
+            JobStatus: handle_job_status,
+        }
         while not self.status_queue.empty():
             status_update = self.status_queue.get()
-            if type(status_update) is WorkerStatus:
-                if status_update.service_id not in self.map_of_workers:
-                    self.map_of_workers[status_update.service_id] = status_update
-                self.map_of_workers[status_update.service_id].update_status(
-                    status_update
-                )
-            elif type(status_update) is JobStatus:
-                if status_update.job_id not in self.map_of_jobs:
-                    self.map_of_jobs[status_update.job_id] = status_update
-                self.map_of_jobs[status_update.job_id].update_status(status_update)
-            elif type(status_update) is CommandStatus:
-                if status_update.command_id not in self.map_of_commands:
-                    self.map_of_commands[status_update.command_id] = status_update
-                self.map_of_commands[status_update.command_id].update_status(
-                    status_update
-                )
-            else:
-                pass
+            status_updater_map[type(status_update)](status_update)
+
         now = datetime.now()
         for worker in self.map_of_workers.values():
             if worker.last_update + STATUS_MESSAGE_TIMEOUT < now:

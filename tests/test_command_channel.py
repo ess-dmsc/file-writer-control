@@ -78,15 +78,6 @@ def test_update_command_status():
     del under_test
 
 
-def test_update_unknown_type():
-    under_test = CommandChannel("localhost:42/some_topic")
-    under_test.status_queue.put("some string")
-    assert len(under_test.list_commands()) == 0
-    assert len(under_test.list_jobs()) == 0
-    assert len(under_test.list_workers()) == 0
-    under_test.stop_thread()
-
-
 def test_stop_thread_twice():
     under_test = CommandChannel("localhost:42/some_topic")
     under_test.stop_thread()
