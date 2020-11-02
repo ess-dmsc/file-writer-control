@@ -59,6 +59,7 @@ class CommandChannel(object):
     """
     A class that implements the functionality for receiving and interpreting messages that are published to the
     Kafka command topic of a pool of file-writers.
+    .. note:: This class implements a thread that will continuously attempt to connect to a Kafka broker.
     """
 
     def __init__(self, command_topic_url: str):
