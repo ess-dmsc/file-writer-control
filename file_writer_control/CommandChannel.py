@@ -116,7 +116,7 @@ class CommandChannel(object):
         try:
             self.thread.join()
         except RuntimeError:
-            pass
+            pass  # Do not throw an exception if the thread has not yet been started.
 
     def __del__(self):
         self.stop_thread()
