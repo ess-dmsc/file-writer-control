@@ -39,7 +39,7 @@ def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queu
             )  # Roughly 300MB
             break
         except NoBrokersAvailable:
-            pass
+            pass  # Do not fail if the broker is not immediately available.
         if not in_queue.empty():
             new_msg = in_queue.get()
             if new_msg == "exit":
