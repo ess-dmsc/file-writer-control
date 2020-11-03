@@ -225,15 +225,6 @@ def test_process_msg_status():
     under_test.process_status.assert_called_once_with(deserialise_status(status_msg))
 
 
-def test_process_msg_unknown():
-    unknown_msg = b"someunknowndata"
-    status_queue = Queue()
-    under_test = InThreadStatusTracker(status_queue)
-    under_test.process_unknown = Mock()
-    under_test.process_message(unknown_msg)
-    under_test.process_unknown.assert_called_once_with(unknown_msg)
-
-
 def test_process_stopped_ok():
     status_queue = Queue()
     under_test = InThreadStatusTracker(status_queue)
