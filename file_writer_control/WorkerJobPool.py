@@ -17,8 +17,8 @@ class WorkerJobPool(WorkerFinder):
         commands from.
         """
         super().__init__(command_topic_url)
-        self.job_pool = KafkaTopicUrl(job_topic_url)
-        self.pool_producer = KafkaProducer(bootstrap_servers=[self.job_pool.host_port])
+        self._job_pool = KafkaTopicUrl(job_topic_url)
+        self._pool_producer = KafkaProducer(bootstrap_servers=[self._job_pool.host_port])
 
     def _send_pool_message(self, message: bytes):
         """
@@ -26,7 +26,7 @@ class WorkerJobPool(WorkerFinder):
         .. note:: If the file-writer has been configured properly, it will only accept start-job messages to this topic.
         :param message: The binary data of the message.
         """
-        self.pool_producer.send(self.job_pool.topic, message)
+        self._pool_producer.send(self._job_pool.topic, message)
 
     def try_start_job(self, job: WriteJob) -> CommandHandler:
         """
@@ -36,3 +36,4 @@ class WorkerJobPool(WorkerFinder):
         self.command_channel.get_command(job.job_id).state = CommandState.WAITING_RESPONSE
         self._send_pool_message(job.get_start_message())
         return CommandHandler(self.command_channel, job.job_id)
+
