@@ -69,7 +69,7 @@ class WorkerCommandChannel(WorkerFinder):
         job_started_time = start_time = time.time()
 
         waiting_to_send_job = True
-
+        loop_pool_rate = 1.0  # Hz
         while start_time + START_JOB_TIMEOUT > time.time() and not stop_event.is_set():
             if waiting_to_send_job:
                 list_of_idle_workers = self.get_idle_workers()
@@ -92,4 +92,4 @@ class WorkerCommandChannel(WorkerFinder):
                         elif job_started_time + SEND_JOB_TIMEOUT < time.time():
                             waiting_to_send_job = True
                         break
-            time.sleep(1)
+            time.sleep(1/loop_pool_rate)
