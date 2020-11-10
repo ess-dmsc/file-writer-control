@@ -4,7 +4,6 @@ from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
 from file_writer_control.WriteJob import WriteJob
 from file_writer_control.utilities.context_managers import sleep_in_between
 from datetime import datetime, timedelta
-import time
 
 
 def get_test_job():
