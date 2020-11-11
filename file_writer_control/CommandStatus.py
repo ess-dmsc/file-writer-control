@@ -6,6 +6,7 @@ class CommandState(Enum):
     """
     The state of a command.
     """
+
     UNKNOWN = auto()
     NO_COMMAND = auto()
     WAITING_RESPONSE = auto()
@@ -18,6 +19,7 @@ class CommandStatus(object):
     """
     The status of a command.
     """
+
     def __init__(self, job_id: str, command_id: str):
         self._job_id = job_id
         self._command_id = command_id
@@ -25,7 +27,7 @@ class CommandStatus(object):
         self._state = CommandState.NO_COMMAND
         self._message = ""
 
-    def __eq__(self, other_status: 'CommandStatus'):
+    def __eq__(self, other_status: "CommandStatus"):
         if not isinstance(other_status, CommandStatus):
             raise NotImplementedError
         return (
@@ -34,7 +36,7 @@ class CommandStatus(object):
             and other_status.state == self.state
         )
 
-    def update_status(self, new_status: 'CommandStatus'):
+    def update_status(self, new_status: "CommandStatus"):
         """
         Updates the status/state of this instance of the CommandStatus class using another instance.
         .. note:: The command identifier of both this instance and the other one must be identical.
@@ -42,7 +44,8 @@ class CommandStatus(object):
         """
         if new_status.command_id != self.command_id:
             raise RuntimeError(
-                f"Command id of status update is not correct ({self.command_id} vs {new_status.command_id})")
+                f"Command id of status update is not correct ({self.command_id} vs {new_status.command_id})"
+            )
         self._state = new_status.state
         if new_status.message:
             self._message = new_status.message

@@ -18,6 +18,7 @@ class WorkerCommandChannel(WorkerFinder):
     """
     A child of WorkerFinder intended for use with "direct command" style of starting a file-writing job.
     """
+
     def __init__(self, command_topic_url: str):
         super().__init__(command_topic_url)
         self.start_job_threads = []
@@ -25,6 +26,7 @@ class WorkerCommandChannel(WorkerFinder):
 
         def do_exit():
             self.stop_threads()
+
         atexit.register(do_exit)
 
     def stop_threads(self):
@@ -72,7 +74,7 @@ class WorkerCommandChannel(WorkerFinder):
         waiting_to_send_job = True
         loop_pool_rate = 1.0  # Hz
         while start_time + START_JOB_TIMEOUT > time.time() and not stop_event.is_set():
-            with sleep_in_between(sleep_time=1/loop_pool_rate):
+            with sleep_in_between(sleep_time=1 / loop_pool_rate):
                 if waiting_to_send_job:
                     list_of_idle_workers = self.get_idle_workers()
                     if len(list_of_idle_workers) > 0:
@@ -89,7 +91,10 @@ class WorkerCommandChannel(WorkerFinder):
                     list_of_jobs = self.command_channel.list_jobs()
                     for job in list_of_jobs:
                         if job.job_id == do_job.job_id:
-                            if job.state == JobState.WRITING or job.state == JobState.DONE:
+                            if (
+                                job.state == JobState.WRITING
+                                or job.state == JobState.DONE
+                            ):
                                 return
                             elif job_started_time + SEND_JOB_TIMEOUT < time.time():
                                 waiting_to_send_job = True

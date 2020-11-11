@@ -126,4 +126,3 @@ def test_is_done():
     under_test.start_job(test_job)
     assert not under_test.is_done()
     worker_finder_mock.get_job_state.assert_called_once_with(test_job.job_id)
-

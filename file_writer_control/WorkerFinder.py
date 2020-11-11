@@ -13,7 +13,12 @@ from file_writer_control.CommandId import generate_command_id
 
 
 class WorkerFinderBase:
-    def __init__(self, command_topic: str, command_channel: CommandChannel, message_producer: KafkaProducer):
+    def __init__(
+        self,
+        command_topic: str,
+        command_channel: CommandChannel,
+        message_producer: KafkaProducer,
+    ):
         """
         Constructor.
         """
@@ -51,7 +56,10 @@ class WorkerFinderBase:
         """
         command_id = generate_command_id("STOP_TIME")
         message = serialise_stop(
-            job_id=job_id, service_id=service_id, command_id=command_id, stop_time=int(stop_time.timestamp() * 1000)
+            job_id=job_id,
+            service_id=service_id,
+            command_id=command_id,
+            stop_time=int(stop_time.timestamp() * 1000),
         )
         self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
         self.send_command(message)
@@ -66,7 +74,9 @@ class WorkerFinderBase:
         :return: A CommandHandler instance for (more) easily checking the outcome of the "stop now" command.
         """
         command_id = generate_command_id("STOP_NOW")
-        message = serialise_stop(job_id=job_id, service_id=service_id, command_id=command_id, stop_time=0)
+        message = serialise_stop(
+            job_id=job_id, service_id=service_id, command_id=command_id, stop_time=0
+        )
         self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
         self.send_command(message)
         return CommandHandler(self.command_channel, command_id)
@@ -115,4 +125,3 @@ class WorkerFinder(WorkerFinderBase):
         command_url = KafkaTopicUrl(command_topic_url)
         temp_producer = KafkaProducer(bootstrap_servers=[command_url.host_port])
         super().__init__(command_url.topic, temp_cmd_ch, temp_producer)
-

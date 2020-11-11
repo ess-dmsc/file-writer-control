@@ -6,6 +6,7 @@ class CommandHandler:
     """
     A stand in for (more easily) checking the state of a command sent to a file-writer.
     """
+
     def __init__(self, command_channel: CommandChannel, command_id: str):
         """
         Constructor.
@@ -29,7 +30,10 @@ class CommandHandler:
         """
         :return: True if the command completed successfully. False otherwise.
         """
-        return self.command_channel.get_command(self.command_id).state == CommandState.SUCCESS
+        return (
+            self.command_channel.get_command(self.command_id).state
+            == CommandState.SUCCESS
+        )
 
     def get_message(self) -> str:
         """

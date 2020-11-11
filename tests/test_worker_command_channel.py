@@ -27,10 +27,16 @@ def get_test_job():
         metadata=metadata,
     )
 
+
 @patch("file_writer_control.WorkerCommandChannel.super")
 def test_list_idle_workers(TestClass):
     under_test = WorkerCommandChannel("localhost:9090/hello")
-    all_workers = [WorkerStatus("id1"), WorkerStatus("id2"), WorkerStatus("id3"), WorkerStatus("id4")]
+    all_workers = [
+        WorkerStatus("id1"),
+        WorkerStatus("id2"),
+        WorkerStatus("id3"),
+        WorkerStatus("id4"),
+    ]
     all_workers[0].state = WorkerState.WRITING
     all_workers[1].state = WorkerState.UNAVAILABLE
     all_workers[2].state = WorkerState.UNKNOWN
@@ -55,7 +61,9 @@ def test_no_workers_within_5_seconds(TestClass):
     assert len(under_test.get_idle_workers.call_args_list) > 0
     assert len(under_test.message_producer.send.call_args_list) == 0
     under_test.command_channel.add_job_id.assert_called_once_with(test_job.job_id)
-    under_test.command_channel.add_command_id.assert_called_once_with(test_job.job_id, test_job.job_id)
+    under_test.command_channel.add_command_id.assert_called_once_with(
+        test_job.job_id, test_job.job_id
+    )
 
 
 @patch("file_writer_control.WorkerCommandChannel.super")
@@ -63,7 +71,7 @@ def test_start_job_within_5_seconds(TestClass):
     with sleep_in_between(sleep_time=5):
         under_test = WorkerCommandChannel("localhost:9090/hello")
         under_test.command_topic = "some_topic"
-        under_test.get_idle_workers = Mock(return_value=[WorkerStatus("id1"), ])
+        under_test.get_idle_workers = Mock(return_value=[WorkerStatus("id1")])
         under_test.message_producer = Mock()
         under_test.command_channel = Mock()
         under_test.command_channel.list_jobs.return_value = []
@@ -73,5 +81,6 @@ def test_start_job_within_5_seconds(TestClass):
     assert len(under_test.get_idle_workers.call_args_list) == 1
     assert len(under_test.message_producer.send.call_args_list) == 1
     under_test.command_channel.add_job_id.assert_called_once_with(test_job.job_id)
-    under_test.command_channel.add_command_id.assert_called_once_with(test_job.job_id, test_job.job_id)
-
+    under_test.command_channel.add_command_id.assert_called_once_with(
+        test_job.job_id, test_job.job_id
+    )
