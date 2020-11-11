@@ -56,4 +56,4 @@ for worker in known_workers:
     print(f"Worker id: {worker.service_id:15s} Current state: {worker.state}")
 ```
 
-**Note:** Due to the use of Kafka for communicating with the file-writers, the `sleep()` statement is required such that we can listen for the file-writers to announce their presence. With out it, the library will likely list 0 file-writers.
+**Note:** Due to the use of Kafka for communicating with the file-writers, the `sleep()` statement is required such that we can listen for the file-writers to announce their presence. With out it, the library will likely list `0` file-writers.
