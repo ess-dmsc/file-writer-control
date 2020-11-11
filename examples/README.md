@@ -1,5 +1,8 @@
 # Usage examples
 
+
+**Note:** _all the examples here requires a running and properly configured Kafka broker and [file-writer](https://github.com/ess-dmsc/kafka-to-nexus)._
+
 ## Principles of operation
 
 The library allows for more or less direct communication with the file-writer using the various helper classes. However, this is not how the library was designed to be used. Instead, communication is abstracted into the following hierarchy:
