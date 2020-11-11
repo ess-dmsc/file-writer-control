@@ -10,6 +10,7 @@ class WorkerJobPool(WorkerFinder):
     """
     A child of WorkerFinder intended for use with "worker pool" style of starting a file-writing job.
     """
+
     def __init__(self, job_topic_url: str, command_topic_url: str):
         """
         :param job_topic_url: The Kafka topic that the available file-writers are listening to for write jobs.
@@ -18,7 +19,9 @@ class WorkerJobPool(WorkerFinder):
         """
         super().__init__(command_topic_url)
         self._job_pool = KafkaTopicUrl(job_topic_url)
-        self._pool_producer = KafkaProducer(bootstrap_servers=[self._job_pool.host_port])
+        self._pool_producer = KafkaProducer(
+            bootstrap_servers=[self._job_pool.host_port]
+        )
 
     def _send_pool_message(self, message: bytes):
         """
@@ -33,7 +36,8 @@ class WorkerJobPool(WorkerFinder):
         See base class for documentation.
         """
         self.command_channel.add_command_id(job.job_id, job.job_id)
-        self.command_channel.get_command(job.job_id).state = CommandState.WAITING_RESPONSE
+        self.command_channel.get_command(
+            job.job_id
+        ).state = CommandState.WAITING_RESPONSE
         self._send_pool_message(job.get_start_message())
         return CommandHandler(self.command_channel, job.job_id)
-

@@ -114,7 +114,7 @@ def test_process_answer_set_stop_time():
         ActionOutcome.Success,
         "some message",
         0,
-        datetime.now()
+        datetime.now(),
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -138,7 +138,7 @@ def test_process_answer_set_stop_time_twice():
         ActionOutcome.Success,
         "some message",
         0,
-        datetime.now()
+        datetime.now(),
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -168,7 +168,7 @@ def test_process_answer_start_job():
         ActionOutcome.Success,
         "some message",
         0,
-        datetime.now()
+        datetime.now(),
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -199,7 +199,16 @@ def test_process_msg_stop():
 
 
 def test_process_msg_answer():
-    answ_msg = serialise_answer("service id", "job id", "command id", ActionType.StartJob, ActionOutcome.Success, "some message", 0, datetime.now())
+    answ_msg = serialise_answer(
+        "service id",
+        "job id",
+        "command id",
+        ActionType.StartJob,
+        ActionOutcome.Success,
+        "some message",
+        0,
+        datetime.now(),
+    )
     status_queue = Queue()
     under_test = InThreadStatusTracker(status_queue)
     under_test.process_answer = Mock()
@@ -231,12 +240,7 @@ def test_process_stopped_ok():
     job_id = "some_job_id"
     service_id = "some_service_id"
     stopped = WritingFinished(
-        service_id,
-        job_id,
-        False,
-        "FileName",
-        "meta data",
-        "some message",
+        service_id, job_id, False, "FileName", "meta data", "some message"
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -256,12 +260,7 @@ def test_process_stopped_error():
     job_id = "some_job_id"
     service_id = "some_service_id"
     stopped = WritingFinished(
-        service_id,
-        job_id,
-        True,
-        "FileName",
-        "meta data",
-        "some message",
+        service_id, job_id, True, "FileName", "meta data", "some message"
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -290,7 +289,7 @@ def test_process_start():
         service_id=service_id,
         instrument_name="instrument name",
         broker="broker",
-        metadata="{}"
+        metadata="{}",
     )
     assert status_queue.empty()
     now = datetime.now()

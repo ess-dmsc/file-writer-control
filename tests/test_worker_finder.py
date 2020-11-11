@@ -36,7 +36,9 @@ def test_try_send_stop_time():
     under_test = WorkerFinderBase(test_topic, cmd_channel_mock, producer_mock)
     result = under_test.try_send_stop_time(service_id, job_id, stop_time)
     assert result.command_id.find("STOP_TIME") != -1
-    cmd_channel_mock.add_command_id.assert_called_once_with(job_id=job_id, command_id=result.command_id)
+    cmd_channel_mock.add_command_id.assert_called_once_with(
+        job_id=job_id, command_id=result.command_id
+    )
     producer_mock.send.assert_called_once()
     topic_name = producer_mock.send.call_args_list[0].args[0]
     assert topic_name == test_topic
@@ -56,7 +58,9 @@ def test_try_send_stop_now():
     under_test = WorkerFinderBase(test_topic, cmd_channel_mock, producer_mock)
     result = under_test.try_send_stop_now(service_id, job_id)
     assert result.command_id.find("STOP_NOW") != -1
-    cmd_channel_mock.add_command_id.assert_called_once_with(job_id=job_id, command_id=result.command_id)
+    cmd_channel_mock.add_command_id.assert_called_once_with(
+        job_id=job_id, command_id=result.command_id
+    )
     producer_mock.send.assert_called_once()
     topic_name = producer_mock.send.call_args_list[0].args[0]
     assert topic_name == test_topic
@@ -109,7 +113,9 @@ def test_list_commands():
     producer_mock = Mock()
     test_topic = "some topic"
     under_test = WorkerFinderBase(test_topic, cmd_channel_mock, producer_mock)
-    assert under_test.list_known_commands() == cmd_channel_mock.list_commands.return_value
+    assert (
+        under_test.list_known_commands() == cmd_channel_mock.list_commands.return_value
+    )
 
 
 def test_list_jobs():

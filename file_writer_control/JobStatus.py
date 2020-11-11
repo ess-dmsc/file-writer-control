@@ -6,6 +6,7 @@ class JobState(Enum):
     """
     The state of a job.
     """
+
     NO_JOB = auto()
     WAITING = auto()
     WRITING = auto()
@@ -19,6 +20,7 @@ class JobStatus:
     """
     Contains general information about the (execution) of a job.
     """
+
     def __init__(self, job_id: str):
         self._job_id = job_id
         self._service_id = ""
@@ -26,7 +28,7 @@ class JobStatus:
         self._state = JobState.WAITING
         self._message = ""
 
-    def update_status(self, new_status: 'JobStatus') -> None:
+    def update_status(self, new_status: "JobStatus") -> None:
         """
         Updates the status/state of a this instance of the JobStatus class, using another instance.
         .. note:: The job identifier of this instance and the other must be identical.
@@ -34,7 +36,8 @@ class JobStatus:
         """
         if new_status.job_id != self.job_id:
             raise RuntimeError(
-                f"Job id of status update is not correct ({self.job_id} vs {new_status.job_id})")
+                f"Job id of status update is not correct ({self.job_id} vs {new_status.job_id})"
+            )
         self._state = new_status.state
         if new_status.message:
             self._message = new_status.message

@@ -10,6 +10,7 @@ class JobHandler:
     """
     A stand in for controlling and checking the state of a job running on a file-writer instance.
     """
+
     def __init__(self, worker_finder: WorkerFinder, job_id=""):
         """
         Constructor.
