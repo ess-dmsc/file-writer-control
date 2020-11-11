@@ -2,8 +2,8 @@ from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
 from unittest.mock import Mock, patch
 from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
 from file_writer_control.WriteJob import WriteJob
+from file_writer_control.utilities.context_managers import sleep_in_between
 from datetime import datetime, timedelta
-import time
 
 
 def get_test_job():
@@ -44,13 +44,13 @@ def test_list_idle_workers(TestClass):
 
 @patch("file_writer_control.WorkerCommandChannel.super")
 def test_no_workers_within_5_seconds(TestClass):
-    under_test = WorkerCommandChannel("localhost:9090/hello")
-    under_test.get_idle_workers = Mock(return_value=[])
-    under_test.message_producer = Mock()
-    under_test.command_channel = Mock()
-    test_job = get_test_job()
-    under_test.try_start_job(test_job)
-    time.sleep(5)
+    with sleep_in_between(sleep_time=5):
+        under_test = WorkerCommandChannel("localhost:9090/hello")
+        under_test.get_idle_workers = Mock(return_value=[])
+        under_test.message_producer = Mock()
+        under_test.command_channel = Mock()
+        test_job = get_test_job()
+        under_test.try_start_job(test_job)
     under_test.stop_threads()
     assert len(under_test.get_idle_workers.call_args_list) > 0
     assert len(under_test.message_producer.send.call_args_list) == 0
@@ -60,15 +60,15 @@ def test_no_workers_within_5_seconds(TestClass):
 
 @patch("file_writer_control.WorkerCommandChannel.super")
 def test_start_job_within_5_seconds(TestClass):
-    under_test = WorkerCommandChannel("localhost:9090/hello")
-    under_test.command_topic = "some_topic"
-    under_test.get_idle_workers = Mock(return_value=[WorkerStatus("id1"), ])
-    under_test.message_producer = Mock()
-    under_test.command_channel = Mock()
-    under_test.command_channel.list_jobs.return_value = []
-    test_job = get_test_job()
-    under_test.try_start_job(test_job)
-    time.sleep(5)
+    with sleep_in_between(sleep_time=5):
+        under_test = WorkerCommandChannel("localhost:9090/hello")
+        under_test.command_topic = "some_topic"
+        under_test.get_idle_workers = Mock(return_value=[WorkerStatus("id1"), ])
+        under_test.message_producer = Mock()
+        under_test.command_channel = Mock()
+        under_test.command_channel.list_jobs.return_value = []
+        test_job = get_test_job()
+        under_test.try_start_job(test_job)
     under_test.stop_threads()
     assert len(under_test.get_idle_workers.call_args_list) == 1
     assert len(under_test.message_producer.send.call_args_list) == 1
