@@ -15,7 +15,7 @@ The library allows for more or less direct communication with the file-writer us
 
 ## Writing a file using direct communication
 
-There are two ways for sending a write job to a filewriter. The first one is by sending the job to a specific file-writer instance (with a unique service id). The library can be used to pick a filewriter from a list of available ones automatically. This is done with the use if the `WorkerCommandChannel` class. The following piece of code illustrates this (also in the file [*write_job_1.py*](write_job_1.py)).
+There are two ways for sending a write job to a file-writer. The first one is by sending the job to a specific file-writer instance (with a unique service id). The library can be used to pick a file-writer from a list of available ones automatically. This is done with the use of the `WorkerCommandChannel` class. The following piece of code illustrates this (also in the file [*write_job_1.py*](write_job_1.py)).
 
 ```python
 from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
@@ -59,4 +59,4 @@ for worker in known_workers:
     print(f"Worker id: {worker.service_id:15s} Current state: {worker.state}")
 ```
 
-**Note:** Due to the use of Kafka for communicating with the file-writers, the `sleep()` statement is required such that we can listen for the file-writers to announce their presence. With out it, the library will likely list 0 file-writers.
+**Note:** Due to the use of Kafka for communicating with the file-writers, the `sleep()` statement is required such that we can listen for the file-writers to announce their presence. With out it, the library will likely list `0` file-writers.
