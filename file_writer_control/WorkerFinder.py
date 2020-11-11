@@ -59,7 +59,7 @@ class WorkerFinderBase:
             job_id=job_id,
             service_id=service_id,
             command_id=command_id,
-            stop_time=int(stop_time.timestamp() * 1000),
+            stop_time=stop_time
         )
         self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
         self.send_command(message)
