@@ -31,6 +31,6 @@ def print_current_state(channel: WorkerCommandChannel):
 
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"
-    command_channel = WorkerCommandChannel("{}/test_command_topic".format(kafka_host))
+    command_channel = WorkerCommandChannel("{}/command_topic".format(kafka_host))
     time.sleep(10)
     print_current_state(command_channel)

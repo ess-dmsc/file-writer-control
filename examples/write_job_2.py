@@ -8,7 +8,7 @@ import time
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"
     command_channel = WorkerJobPool(
-        "{}/job_pool_topic".format(kafka_host), "{}/command_topic".format(kafka_host)
+        "{}/job_topic".format(kafka_host), "{}/command_topic".format(kafka_host)
     )
     job_handler = JobHandler(worker_finder=command_channel)
     start_time = datetime.now()

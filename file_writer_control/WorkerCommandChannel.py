@@ -3,7 +3,6 @@ from file_writer_control.WorkerFinder import WorkerFinder
 from file_writer_control.WriteJob import WriteJob
 from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
 from file_writer_control.JobStatus import JobState
-from file_writer_control.utilities.context_managers import sleep_in_between
 from random import randrange
 import threading
 import time
@@ -72,30 +71,30 @@ class WorkerCommandChannel(WorkerFinder):
         job_started_time = start_time = time.time()
 
         waiting_to_send_job = True
-        loop_pool_rate = 1.0  # Hz
+        loop_poll_rate = 1.0  # Hz
         while start_time + START_JOB_TIMEOUT > time.time() and not stop_event.is_set():
-            with sleep_in_between(sleep_time=1 / loop_pool_rate):
-                if waiting_to_send_job:
-                    list_of_idle_workers = self.get_idle_workers()
-                    if len(list_of_idle_workers) > 0:
-                        used_worker = list_of_idle_workers[
-                            randrange(len(list_of_idle_workers))
-                        ]
-                        do_job.service_id = used_worker.service_id
-                        self.message_producer.send(
-                            self.command_topic, do_job.get_start_message()
-                        )
-                        waiting_to_send_job = False
-                        job_started_time = time.time()
-                else:
-                    list_of_jobs = self.command_channel.list_jobs()
-                    for job in list_of_jobs:
-                        if job.job_id == do_job.job_id:
-                            if (
-                                job.state == JobState.WRITING
-                                or job.state == JobState.DONE
-                            ):
-                                return
-                            elif job_started_time + SEND_JOB_TIMEOUT < time.time():
-                                waiting_to_send_job = True
-                            break
+            if waiting_to_send_job:
+                list_of_idle_workers = self.get_idle_workers()
+                if len(list_of_idle_workers) > 0:
+                    used_worker = list_of_idle_workers[
+                        randrange(len(list_of_idle_workers))
+                    ]
+                    do_job.service_id = used_worker.service_id
+                    self.message_producer.send(
+                        self.command_topic, do_job.get_start_message()
+                    )
+                    waiting_to_send_job = False
+                    job_started_time = time.time()
+            else:
+                list_of_jobs = self.command_channel.list_jobs()
+                for job in list_of_jobs:
+                    if job.job_id == do_job.job_id:
+                        if (
+                            job.state == JobState.WRITING
+                            or job.state == JobState.DONE
+                        ):
+                            return
+                        elif job_started_time + SEND_JOB_TIMEOUT < time.time():
+                            waiting_to_send_job = True
+                        break
+            time.sleep(1.0/loop_poll_rate)
