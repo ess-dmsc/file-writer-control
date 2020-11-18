@@ -24,6 +24,7 @@ class JobStatus:
     def __init__(self, job_id: str):
         self._job_id = job_id
         self._service_id = ""
+        self._file_name = ""
         self._last_update = datetime.now()
         self._state = JobState.WAITING
         self._message = ""
@@ -42,6 +43,7 @@ class JobStatus:
         if new_status.message:
             self._message = new_status.message
         self._service_id = new_status.service_id
+        self._file_name = new_status.file_name
         self._last_update = new_status.last_update
 
     @property
@@ -81,6 +83,20 @@ class JobStatus:
         The current state of the job.
         """
         return self._state
+
+    @property
+    def file_name(self) -> str:
+        """
+        The file name of the job. None if the file name is not known.
+        """
+        if self._file_name == "":
+            return None
+        return self._file_name
+
+    @file_name.setter
+    def file_name(self, new_file_name: str) -> None:
+        self._file_name = new_file_name
+        self._last_update = datetime.now()
 
     @state.setter
     def state(self, new_state: JobState) -> None:
