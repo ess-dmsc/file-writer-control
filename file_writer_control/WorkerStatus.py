@@ -1,5 +1,7 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum, auto
+
+STATUS_MESSAGE_TIMEOUT = timedelta(seconds=5)
 
 
 class WorkerState(Enum):
@@ -43,6 +45,17 @@ class WorkerStatus(object):
             )
         self._state = new_status.state
         self._last_update = new_status.last_update
+
+    def check_if_outdated(self, current_time: datetime):
+        """
+        Given the current time, state and the time of the last update: Have we lost the connection?
+        :param current_time: The current time
+        """
+        if (
+                self.state != WorkerState.UNAVAILABLE
+                and current_time - self.last_update > STATUS_MESSAGE_TIMEOUT
+        ):
+            self._state = WorkerState.UNAVAILABLE
 
     @property
     def state(self) -> WorkerState:

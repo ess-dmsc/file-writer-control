@@ -1,6 +1,7 @@
 from enum import Enum, auto
-from datetime import datetime
+from datetime import datetime, timedelta
 
+JOB_STATUS_TIMEOUT = timedelta(seconds=5)
 
 class JobState(Enum):
     """
@@ -45,6 +46,18 @@ class JobStatus:
         self._service_id = new_status.service_id
         self._file_name = new_status.file_name
         self._last_update = new_status.last_update
+
+    def check_if_outdated(self, current_time: datetime):
+        """
+        Given the current time, state and the time of the last update: Have we lost the connection?
+        :param current_time: The current time
+        """
+        if (
+                self.state != JobState.DONE
+                and self.state != JobState.ERROR
+                and current_time - self.last_update > JOB_STATUS_TIMEOUT
+        ):
+            self._state = JobState.TIMEOUT
 
     @property
     def job_id(self) -> str:

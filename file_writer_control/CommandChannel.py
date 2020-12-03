@@ -8,15 +8,9 @@ import atexit
 from datetime import datetime
 
 from file_writer_control.InThreadStatusTracker import InThreadStatusTracker
-from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
-
-from file_writer_control.JobStatus import JobStatus, JobState
-from file_writer_control.CommandStatus import CommandStatus, CommandState
-from file_writer_control.InThreadStatusTracker import (
-    STATUS_MESSAGE_TIMEOUT,
-    COMMAND_STATUS_TIMEOUT,
-    JOB_STATUS_TIMEOUT,
-)
+from file_writer_control.WorkerStatus import WorkerStatus
+from file_writer_control.JobStatus import JobStatus
+from file_writer_control.CommandStatus import CommandStatus
 
 
 def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queue):
@@ -153,20 +147,8 @@ class CommandChannel(object):
             status_updater_map[type(status_update)](status_update)
 
         now = datetime.now()
-        for worker in self.map_of_workers.values():
-            if worker.last_update + STATUS_MESSAGE_TIMEOUT < now:
-                worker.state = WorkerState.UNAVAILABLE
-        for job in self.map_of_jobs.values():
-            if job.last_update + JOB_STATUS_TIMEOUT < now and not (
-                job.state == JobState.DONE or job.state == JobState.ERROR
-            ):
-                job.state = JobState.TIMEOUT
-        for command in self.map_of_commands.values():
-            if command.last_update + COMMAND_STATUS_TIMEOUT < now and not (
-                command.state == CommandState.SUCCESS
-                or command.state == CommandState.ERROR
-            ):
-                command.state = CommandState.TIMEOUT_RESPONSE
+        for entity in list(self.map_of_workers.values()) + list(self.map_of_commands.values()) + list(self.map_of_jobs.values()):
+            entity.check_if_outdated(now)
 
     def list_workers(self) -> List[WorkerStatus]:
         """

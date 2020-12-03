@@ -5,7 +5,7 @@ from streaming_data_types.run_stop_6s4t import FILE_IDENTIFIER as STOP_TIME_IDEN
 from streaming_data_types.finished_writing_wrdn import (
     FILE_IDENTIFIER as STOPPED_IDENTIFIER,
 )
-from datetime import datetime, timedelta
+from datetime import datetime
 from streaming_data_types.utils import _get_schema
 from streaming_data_types import deserialise_x5f2 as deserialise_status
 from streaming_data_types import deserialise_answ as deserialise_answer
@@ -28,10 +28,6 @@ from file_writer_control.StateExtractor import (
 import json
 from streaming_data_types.action_response_answ import Response
 from typing import Dict
-
-STATUS_MESSAGE_TIMEOUT = timedelta(seconds=5)
-JOB_STATUS_TIMEOUT = timedelta(seconds=5)
-COMMAND_STATUS_TIMEOUT = timedelta(seconds=30)
 
 
 class InThreadStatusTracker:
@@ -79,15 +75,9 @@ class InThreadStatusTracker:
         after the limit_time.
         :param limit_time: The cut-off time for deciding which updates should be sent to the status queue.
         """
-        for worker in self.known_workers.values():
-            if worker.last_update >= limit_time:
-                self.queue.put(worker)
-        for job in self.known_jobs.values():
-            if job.last_update >= limit_time:
-                self.queue.put(job)
-        for command in self.known_commands.values():
-            if command.last_update >= limit_time:
-                self.queue.put(command)
+        for entity in list(self.known_workers.values()) + list(self.known_jobs.values()) + list(self.known_commands.values()):
+            if entity.last_update >= limit_time:
+                self.queue.put(entity)
 
     def check_for_worker_presence(self, service_id: str):
         """
@@ -123,26 +113,8 @@ class InThreadStatusTracker:
         reached.
         """
         now = datetime.now()
-        for worker in self.known_workers.values():
-            if (
-                worker.state != WorkerState.UNAVAILABLE
-                and now - worker.last_update > STATUS_MESSAGE_TIMEOUT
-            ):
-                worker.state = WorkerState.UNAVAILABLE
-        for command in self.known_commands.values():
-            if (
-                command.state != CommandState.SUCCESS
-                and command.state != CommandState.ERROR
-                and now - command.last_update > COMMAND_STATUS_TIMEOUT
-            ):
-                command.state = CommandState.TIMEOUT_RESPONSE
-        for job in self.known_jobs.values():
-            if (
-                job.state != JobState.DONE
-                and job.state != JobState.ERROR
-                and now - job.last_update > JOB_STATUS_TIMEOUT
-            ):
-                job.state = JobState.TIMEOUT
+        for entity in list(self.known_workers.values()) + list(self.known_jobs.values()) + list(self.known_commands.values()):
+            entity.check_if_outdated(now)
 
     def process_answer(self, answer: Response):
         """

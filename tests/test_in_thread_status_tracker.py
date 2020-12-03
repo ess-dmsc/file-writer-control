@@ -36,7 +36,7 @@ def test_process_status_once():
         "host_name",
         "process_id",
         update_interval=5,
-        status_json='{"state":"writing","job_id":"some_job_id"}',
+        status_json='{"state":"writing","job_id":"some_job_id","file_being_written":"some_file_name.nxs"}',
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -44,6 +44,11 @@ def test_process_status_once():
     under_test.send_status_if_updated(now)
     assert not status_queue.empty()
     assert type(status_queue.get()) is WorkerStatus
+    assert len(under_test.known_jobs) == 1
+    keys = under_test.known_jobs.keys()
+    print(list(keys)[0])
+    assert under_test.known_jobs[list(keys)[0]].file_name == "some_file_name.nxs"
+    assert under_test.known_jobs[list(keys)[0]].state == JobState.WRITING
 
 
 def test_process_status_twice_two_updates_1():
@@ -56,7 +61,7 @@ def test_process_status_twice_two_updates_1():
         "host_name",
         "process_id",
         update_interval=5,
-        status_json='{"state":"writing","job_id":"some_job_id"}',
+        status_json='{"state":"writing","job_id":"some_job_id","file_being_written":"some_file_name.nxs"}',
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -80,7 +85,7 @@ def test_process_status_twice_two_updates_2():
         "host_name",
         "process_id",
         update_interval=5,
-        status_json='{"state":"writing","job_id":"some_job_id"}',
+        status_json='{"state":"writing","job_id":"some_job_id","file_being_written":"some_file_name.nxs"}',
     )
     assert status_queue.empty()
     now = datetime.now()
