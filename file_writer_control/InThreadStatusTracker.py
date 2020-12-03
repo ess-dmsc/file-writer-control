@@ -31,7 +31,7 @@ from typing import Dict
 
 STATUS_MESSAGE_TIMEOUT = timedelta(seconds=5)
 JOB_STATUS_TIMEOUT = timedelta(seconds=5)
-COMMAND_STATUS_TIMEOUT = timedelta(seconds=20)
+COMMAND_STATUS_TIMEOUT = timedelta(seconds=30)
 
 
 class InThreadStatusTracker:
