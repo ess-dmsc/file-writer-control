@@ -1,7 +1,9 @@
 from file_writer_control.CommandChannel import CommandChannel
-from file_writer_control.WorkerStatus import WorkerStatus
-from file_writer_control.JobStatus import JobStatus
-from file_writer_control.CommandStatus import CommandStatus
+from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
+from file_writer_control.JobStatus import JobStatus, JobState
+from file_writer_control.CommandStatus import CommandStatus, CommandState
+from datetime import datetime, timedelta
+from file_writer_control.InThreadStatusTracker import DEAD_ENTITY_TIME_LIMIT
 
 
 def test_add_job_id():
@@ -18,6 +20,32 @@ def test_add_job_id():
     assert len(under_test.list_jobs()) == 2
     assert under_test.get_job(job_id_2).job_id == job_id_2
     under_test.stop_thread()
+
+
+def test_prune_old():
+    under_test = CommandChannel("localhost:42/some_topic")
+    now = datetime.now()
+    test_worker = WorkerStatus("some_service_id")
+    test_worker.state = WorkerState.IDLE
+    under_test.map_of_workers["some_id"] = test_worker
+
+    test_job = JobStatus("some_id")
+    test_job.state = JobState.WRITING
+    under_test.map_of_jobs["some_id"] = test_job
+
+    test_command = CommandStatus("some_id", "some_other_id")
+    test_command.state = CommandState.SUCCESS
+    under_test.map_of_commands["some_id"] = test_command
+
+    time_diff = timedelta(minutes=5)
+    under_test.update_workers(now + DEAD_ENTITY_TIME_LIMIT - time_diff)
+    assert len(under_test.map_of_commands) == 1
+    assert len(under_test.map_of_jobs) == 1
+    assert len(under_test.map_of_workers) == 1
+    under_test.update_workers(now + DEAD_ENTITY_TIME_LIMIT + time_diff)
+    assert len(under_test.map_of_commands) == 0
+    assert len(under_test.map_of_jobs) == 0
+    assert len(under_test.map_of_workers) == 0
 
 
 def test_add_command_id():

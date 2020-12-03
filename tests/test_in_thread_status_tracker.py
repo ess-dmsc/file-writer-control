@@ -1,4 +1,4 @@
-from file_writer_control.InThreadStatusTracker import InThreadStatusTracker
+from file_writer_control.InThreadStatusTracker import InThreadStatusTracker, DEAD_ENTITY_TIME_LIMIT
 from queue import Queue
 from streaming_data_types.status_x5f2 import StatusMessage
 from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
@@ -11,7 +11,7 @@ from streaming_data_types.action_response_answ import (
 )
 from file_writer_control.JobStatus import JobStatus, JobState
 from file_writer_control.CommandStatus import CommandStatus, CommandState
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import Mock
 from streaming_data_types import serialise_pl72 as serialise_start
 from streaming_data_types import deserialise_pl72 as deserialise_start
@@ -160,6 +160,33 @@ def test_process_answer_set_stop_time_twice():
     assert type(status_queue.get()) is JobStatus
     assert type(status_queue.get()) is CommandStatus
     assert status_queue.empty()
+
+
+def test_prune_old():
+    status_queue = Queue()
+    under_test = InThreadStatusTracker(status_queue)
+    now = datetime.now()
+    test_worker = WorkerStatus("some_service_id")
+    test_worker.state = WorkerState.IDLE
+    under_test.known_workers["some_id"] = test_worker
+
+    test_job = JobStatus("some_id")
+    test_job.state = JobState.WRITING
+    under_test.known_jobs["some_id"] = test_job
+
+    test_command = CommandStatus("some_id", "some_other_id")
+    test_command.state = CommandState.SUCCESS
+    under_test.known_commands["some_id"] = test_command
+
+    time_diff = timedelta(minutes=5)
+    under_test.prune_dead_entities(now + DEAD_ENTITY_TIME_LIMIT - time_diff)
+    assert len(under_test.known_commands) == 1
+    assert len(under_test.known_jobs) == 1
+    assert len(under_test.known_workers) == 1
+    under_test.prune_dead_entities(now + DEAD_ENTITY_TIME_LIMIT + time_diff)
+    assert len(under_test.known_commands) == 0
+    assert len(under_test.known_jobs) == 0
+    assert len(under_test.known_workers) == 0
 
 
 def test_process_answer_start_job():

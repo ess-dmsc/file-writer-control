@@ -7,7 +7,7 @@ from typing import List, Union, Dict
 import atexit
 from datetime import datetime
 
-from file_writer_control.InThreadStatusTracker import InThreadStatusTracker
+from file_writer_control.InThreadStatusTracker import InThreadStatusTracker, DEAD_ENTITY_TIME_LIMIT
 from file_writer_control.WorkerStatus import WorkerStatus
 from file_writer_control.JobStatus import JobStatus
 from file_writer_control.CommandStatus import CommandStatus
@@ -115,7 +115,7 @@ class CommandChannel(object):
     def __del__(self):
         self.stop_thread()
 
-    def update_workers(self):
+    def update_workers(self, current_time: datetime = datetime.now()):
         """
         Update the list of known workers, jobs and commands. This is a non-blocking call but it might take some time
         to execute if the queue of updates is long. This member function is called by many of the other member functions
@@ -146,9 +146,17 @@ class CommandChannel(object):
             status_update = self.status_queue.get()
             status_updater_map[type(status_update)](status_update)
 
-        now = datetime.now()
+
         for entity in list(self.map_of_workers.values()) + list(self.map_of_commands.values()) + list(self.map_of_jobs.values()):
-            entity.check_if_outdated(now)
+            entity.check_if_outdated(current_time)
+
+        def pruner(entities_dictionary):
+            for key in list(entities_dictionary.keys()):
+                if entities_dictionary[key].last_update + DEAD_ENTITY_TIME_LIMIT < current_time:
+                    del entities_dictionary[key]
+        pruner(self.map_of_commands)
+        pruner(self.map_of_workers)
+        pruner(self.map_of_jobs)
 
     def list_workers(self) -> List[WorkerStatus]:
         """

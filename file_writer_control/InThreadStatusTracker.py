@@ -5,7 +5,7 @@ from streaming_data_types.run_stop_6s4t import FILE_IDENTIFIER as STOP_TIME_IDEN
 from streaming_data_types.finished_writing_wrdn import (
     FILE_IDENTIFIER as STOPPED_IDENTIFIER,
 )
-from datetime import datetime
+from datetime import datetime, timedelta
 from streaming_data_types.utils import _get_schema
 from streaming_data_types import deserialise_x5f2 as deserialise_status
 from streaming_data_types import deserialise_answ as deserialise_answer
@@ -28,6 +28,8 @@ from file_writer_control.StateExtractor import (
 import json
 from streaming_data_types.action_response_answ import Response
 from typing import Dict
+
+DEAD_ENTITY_TIME_LIMIT = timedelta(hours=1)
 
 
 class InThreadStatusTracker:
@@ -115,6 +117,19 @@ class InThreadStatusTracker:
         now = datetime.now()
         for entity in list(self.known_workers.values()) + list(self.known_jobs.values()) + list(self.known_commands.values()):
             entity.check_if_outdated(now)
+
+    def prune_dead_entities(self, current_time: datetime):
+        """
+        Will remove old jobs, workers and commands that have not been updated recently.
+        :return:
+        """
+        def pruner(entities_dictionary):
+            for key in list(entities_dictionary.keys()):
+                if entities_dictionary[key].last_update + DEAD_ENTITY_TIME_LIMIT < current_time:
+                    del entities_dictionary[key]
+        pruner(self.known_workers)
+        pruner(self.known_commands)
+        pruner(self.known_jobs)
 
     def process_answer(self, answer: Response):
         """
