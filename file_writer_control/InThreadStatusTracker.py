@@ -77,7 +77,11 @@ class InThreadStatusTracker:
         after the limit_time.
         :param limit_time: The cut-off time for deciding which updates should be sent to the status queue.
         """
-        for entity in list(self.known_workers.values()) + list(self.known_jobs.values()) + list(self.known_commands.values()):
+        for entity in (
+            list(self.known_workers.values())
+            + list(self.known_jobs.values())
+            + list(self.known_commands.values())
+        ):
             if entity.last_update >= limit_time:
                 self.queue.put(entity)
 
@@ -115,7 +119,11 @@ class InThreadStatusTracker:
         reached.
         """
         now = datetime.now()
-        for entity in list(self.known_workers.values()) + list(self.known_jobs.values()) + list(self.known_commands.values()):
+        for entity in (
+            list(self.known_workers.values())
+            + list(self.known_jobs.values())
+            + list(self.known_commands.values())
+        ):
             entity.check_if_outdated(now)
 
     def prune_dead_entities(self, current_time: datetime):
@@ -123,10 +131,15 @@ class InThreadStatusTracker:
         Will remove old jobs, workers and commands that have not been updated recently.
         :return:
         """
+
         def pruner(entities_dictionary):
             for key in list(entities_dictionary.keys()):
-                if entities_dictionary[key].last_update + DEAD_ENTITY_TIME_LIMIT < current_time:
+                if (
+                    entities_dictionary[key].last_update + DEAD_ENTITY_TIME_LIMIT
+                    < current_time
+                ):
                     del entities_dictionary[key]
+
         pruner(self.known_workers)
         pruner(self.known_commands)
         pruner(self.known_jobs)
@@ -142,10 +155,10 @@ class InThreadStatusTracker:
         new_job_state = extract_job_state_from_answer(answer)
         if new_job_state is not None:
             self.known_jobs[answer.job_id].state = new_job_state
-        self.known_commands[
-            answer.command_id
-        ].state = extract_state_from_command_answer(answer)
-        self.known_commands[answer.command_id].message = answer.message
+        current_command = self.known_commands[answer.command_id]
+        current_command.state = extract_state_from_command_answer(answer)
+        current_command.message = answer.message
+        current_command.response_code = Response.status_code
         self.known_jobs[answer.job_id].message = answer.message
 
     def process_status(self, status_update: StatusMessage):

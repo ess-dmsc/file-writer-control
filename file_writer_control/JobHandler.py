@@ -43,7 +43,12 @@ class JobHandler:
         :return: True if job was completed without errors. False otherwise.
         .. note:: If the job was completed with errors, this call will return False.
         """
-        return self.worker_finder.get_job_state(self._job_id) == JobState.DONE
+        current_job_state = self.worker_finder.get_job_state(self._job_id)
+        if current_job_state == JobState.ERROR:
+            raise RuntimeError(f'Job failed with error message "{self.get_message()}".')
+        if current_job_state == JobState.TIMEOUT:
+            raise RuntimeError("Timed out while trying to start write job.")
+        return current_job_state == JobState.DONE
 
     def get_message(self) -> str:
         """

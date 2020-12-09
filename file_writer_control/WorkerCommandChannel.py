@@ -89,12 +89,9 @@ class WorkerCommandChannel(WorkerFinder):
                 list_of_jobs = self.command_channel.list_jobs()
                 for job in list_of_jobs:
                     if job.job_id == do_job.job_id:
-                        if (
-                            job.state == JobState.WRITING
-                            or job.state == JobState.DONE
-                        ):
+                        if job.state == JobState.WRITING or job.state == JobState.DONE:
                             return
                         elif job_started_time + SEND_JOB_TIMEOUT < time.time():
                             waiting_to_send_job = True
                         break
-            time.sleep(1.0/loop_poll_rate)
+            time.sleep(1.0 / loop_poll_rate)

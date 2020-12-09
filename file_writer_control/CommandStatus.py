@@ -1,5 +1,6 @@
 from enum import Enum, auto
 from datetime import datetime, timedelta
+from typing import Optional
 
 COMMAND_STATUS_TIMEOUT = timedelta(seconds=30)
 
@@ -28,6 +29,7 @@ class CommandStatus(object):
         self._last_update = datetime.now()
         self._state = CommandState.NO_COMMAND
         self._message = ""
+        self._response_code = None
 
     def __eq__(self, other_status: "CommandStatus"):
         if not isinstance(other_status, CommandStatus):
@@ -36,6 +38,7 @@ class CommandStatus(object):
             other_status.command_id == self.command_id
             and other_status.job_id == self.job_id
             and other_status.state == self.state
+            and other_status.response_code == self.response_code
         )
 
     def update_status(self, new_status: "CommandStatus"):
@@ -49,6 +52,7 @@ class CommandStatus(object):
                 f"Command id of status update is not correct ({self.command_id} vs {new_status.command_id})"
             )
         self._state = new_status.state
+        self._response_code = new_status.response_code
         if new_status.message:
             self._message = new_status.message
         self._last_update = new_status.last_update
@@ -59,11 +63,26 @@ class CommandStatus(object):
         :param current_time: The current time
         """
         if (
-                self.state != CommandState.SUCCESS
-                and self.state != CommandState.ERROR
-                and current_time - self.last_update > COMMAND_STATUS_TIMEOUT
+            self.state != CommandState.SUCCESS
+            and self.state != CommandState.ERROR
+            and current_time - self.last_update > COMMAND_STATUS_TIMEOUT
         ):
             self._state = CommandState.TIMEOUT_RESPONSE
+
+    @property
+    def response_code(self) -> Optional[int]:
+        """
+        A code that mirrors the result of a command if a response has been received. Is set to None otherwise.
+        """
+        return self._response_code
+
+    @response_code.setter
+    def response_code(self, new_code: int):
+        """
+        Set the current response code.
+        """
+        self._response_code = new_code
+        self._last_update = datetime.now()
 
     @property
     def job_id(self) -> str:

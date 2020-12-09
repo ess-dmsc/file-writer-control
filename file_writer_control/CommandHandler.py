@@ -30,10 +30,14 @@ class CommandHandler:
         """
         :return: True if the command completed successfully. False otherwise.
         """
-        return (
-            self.command_channel.get_command(self.command_id).state
-            == CommandState.SUCCESS
-        )
+        current_state = self.command_channel.get_command(self.command_id).state
+        if current_state == CommandState.ERROR:
+            raise RuntimeError(
+                f'Command failed with error message "{self.get_message()}".'
+            )
+        if current_state == CommandState.TIMEOUT_RESPONSE:
+            raise RuntimeError("Timed out while trying to send command.")
+        return current_state == CommandState.SUCCESS
 
     def get_message(self) -> str:
         """
