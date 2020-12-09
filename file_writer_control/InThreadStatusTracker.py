@@ -29,9 +29,7 @@ import json
 from streaming_data_types.action_response_answ import Response
 from typing import Dict
 
-STATUS_MESSAGE_TIMEOUT = timedelta(seconds=5)
-JOB_STATUS_TIMEOUT = timedelta(seconds=5)
-COMMAND_STATUS_TIMEOUT = timedelta(seconds=20)
+DEAD_ENTITY_TIME_LIMIT = timedelta(hours=1)
 
 
 class InThreadStatusTracker:
@@ -79,15 +77,9 @@ class InThreadStatusTracker:
         after the limit_time.
         :param limit_time: The cut-off time for deciding which updates should be sent to the status queue.
         """
-        for worker in self.known_workers.values():
-            if worker.last_update >= limit_time:
-                self.queue.put(worker)
-        for job in self.known_jobs.values():
-            if job.last_update >= limit_time:
-                self.queue.put(job)
-        for command in self.known_commands.values():
-            if command.last_update >= limit_time:
-                self.queue.put(command)
+        for entity in list(self.known_workers.values()) + list(self.known_jobs.values()) + list(self.known_commands.values()):
+            if entity.last_update >= limit_time:
+                self.queue.put(entity)
 
     def check_for_worker_presence(self, service_id: str):
         """
@@ -123,26 +115,21 @@ class InThreadStatusTracker:
         reached.
         """
         now = datetime.now()
-        for worker in self.known_workers.values():
-            if (
-                worker.state != WorkerState.UNAVAILABLE
-                and now - worker.last_update > STATUS_MESSAGE_TIMEOUT
-            ):
-                worker.state = WorkerState.UNAVAILABLE
-        for command in self.known_commands.values():
-            if (
-                command.state != CommandState.SUCCESS
-                and command.state != CommandState.ERROR
-                and now - command.last_update > COMMAND_STATUS_TIMEOUT
-            ):
-                command.state = CommandState.TIMEOUT_RESPONSE
-        for job in self.known_jobs.values():
-            if (
-                job.state != JobState.DONE
-                and job.state != JobState.ERROR
-                and now - job.last_update > JOB_STATUS_TIMEOUT
-            ):
-                job.state = JobState.TIMEOUT
+        for entity in list(self.known_workers.values()) + list(self.known_jobs.values()) + list(self.known_commands.values()):
+            entity.check_if_outdated(now)
+
+    def prune_dead_entities(self, current_time: datetime):
+        """
+        Will remove old jobs, workers and commands that have not been updated recently.
+        :return:
+        """
+        def pruner(entities_dictionary):
+            for key in list(entities_dictionary.keys()):
+                if entities_dictionary[key].last_update + DEAD_ENTITY_TIME_LIMIT < current_time:
+                    del entities_dictionary[key]
+        pruner(self.known_workers)
+        pruner(self.known_commands)
+        pruner(self.known_jobs)
 
     def process_answer(self, answer: Response):
         """
@@ -170,9 +157,12 @@ class InThreadStatusTracker:
         current_state = extract_worker_state_from_status(status_update)
         self.known_workers[status_update.service_id].state = current_state
         if current_state == WorkerState.WRITING:
-            job_id = json.loads(status_update.status_json)["job_id"]
+            json_data = json.loads(status_update.status_json)
+            job_id = json_data["job_id"]
+            file_name = json_data["file_being_written"]
             self.check_for_job_presence(job_id)
             self.known_jobs[job_id].state = JobState.WRITING
+            self.known_jobs[job_id].file_name = file_name
             # For some jobs, we will only know the service-id when a worker starts working on a job.
             # Thus we need the following statement to update the (known) service-id of a job.
             try:

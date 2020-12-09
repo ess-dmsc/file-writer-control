@@ -84,3 +84,10 @@ class JobHandler:
         return self.worker_finder.try_send_stop_now(
             current_status.service_id, self._job_id
         )
+
+    @property
+    def job_id(self) -> str:
+        """
+        The job identifier of the job that this instance of the JobHandler class represent.
+        """
+        return self._job_id

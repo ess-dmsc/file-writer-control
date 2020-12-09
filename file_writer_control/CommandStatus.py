@@ -1,5 +1,7 @@
 from enum import Enum, auto
-from datetime import datetime
+from datetime import datetime, timedelta
+
+COMMAND_STATUS_TIMEOUT = timedelta(seconds=30)
 
 
 class CommandState(Enum):
@@ -50,6 +52,18 @@ class CommandStatus(object):
         if new_status.message:
             self._message = new_status.message
         self._last_update = new_status.last_update
+
+    def check_if_outdated(self, current_time: datetime):
+        """
+        Given the current time, state and the time of the last update: Have we lost the connection?
+        :param current_time: The current time
+        """
+        if (
+                self.state != CommandState.SUCCESS
+                and self.state != CommandState.ERROR
+                and current_time - self.last_update > COMMAND_STATUS_TIMEOUT
+        ):
+            self._state = CommandState.TIMEOUT_RESPONSE
 
     @property
     def job_id(self) -> str:

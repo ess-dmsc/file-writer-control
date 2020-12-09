@@ -1,6 +1,7 @@
 from enum import Enum, auto
-from datetime import datetime
+from datetime import datetime, timedelta
 
+JOB_STATUS_TIMEOUT = timedelta(seconds=5)
 
 class JobState(Enum):
     """
@@ -24,6 +25,7 @@ class JobStatus:
     def __init__(self, job_id: str):
         self._job_id = job_id
         self._service_id = ""
+        self._file_name = ""
         self._last_update = datetime.now()
         self._state = JobState.WAITING
         self._message = ""
@@ -42,7 +44,20 @@ class JobStatus:
         if new_status.message:
             self._message = new_status.message
         self._service_id = new_status.service_id
+        self._file_name = new_status.file_name
         self._last_update = new_status.last_update
+
+    def check_if_outdated(self, current_time: datetime):
+        """
+        Given the current time, state and the time of the last update: Have we lost the connection?
+        :param current_time: The current time
+        """
+        if (
+                self.state != JobState.DONE
+                and self.state != JobState.ERROR
+                and current_time - self.last_update > JOB_STATUS_TIMEOUT
+        ):
+            self._state = JobState.TIMEOUT
 
     @property
     def job_id(self) -> str:
@@ -81,6 +96,20 @@ class JobStatus:
         The current state of the job.
         """
         return self._state
+
+    @property
+    def file_name(self) -> str:
+        """
+        The file name of the job. None if the file name is not known.
+        """
+        if self._file_name == "":
+            return None
+        return self._file_name
+
+    @file_name.setter
+    def file_name(self, new_file_name: str) -> None:
+        self._file_name = new_file_name
+        self._last_update = datetime.now()
 
     @state.setter
     def state(self, new_state: JobState) -> None:
