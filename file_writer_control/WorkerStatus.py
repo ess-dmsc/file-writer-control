@@ -52,8 +52,8 @@ class WorkerStatus(object):
         :param current_time: The current time
         """
         if (
-                self.state != WorkerState.UNAVAILABLE
-                and current_time - self.last_update > STATUS_MESSAGE_TIMEOUT
+            self.state != WorkerState.UNAVAILABLE
+            and current_time - self.last_update > STATUS_MESSAGE_TIMEOUT
         ):
             self._state = WorkerState.UNAVAILABLE
 

@@ -1,6 +1,7 @@
 from unittest.mock import Mock
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.CommandStatus import CommandState, CommandStatus
+import pytest
 
 
 def test_get_state_no_id():
@@ -45,6 +46,19 @@ def test_get_error_with_id():
     mock_cmd_ch.get_command.assert_called_once_with(cmd_id)
 
 
+def test_has_timed_out():
+    mock_cmd_ch = Mock()
+    job_id = "some_job_id"
+    cmd_id = "some_command_id"
+    stand_in_status = CommandStatus(job_id, cmd_id)
+    stand_in_status.state = CommandState.TIMEOUT_RESPONSE
+    mock_cmd_ch.get_command.return_value = stand_in_status
+    under_test = CommandHandler(mock_cmd_ch, cmd_id)
+    with pytest.raises(RuntimeError):
+        under_test.is_done()
+    mock_cmd_ch.get_command.assert_called_once_with(cmd_id)
+
+
 def test_is_not_done():
     mock_cmd_ch = Mock()
     job_id = "some_job_id"
@@ -53,8 +67,9 @@ def test_is_not_done():
     stand_in_status.state = CommandState.ERROR
     mock_cmd_ch.get_command.return_value = stand_in_status
     under_test = CommandHandler(mock_cmd_ch, cmd_id)
-    assert not under_test.is_done()
-    mock_cmd_ch.get_command.assert_called_once_with(cmd_id)
+    with pytest.raises(RuntimeError):
+        under_test.is_done()
+    assert mock_cmd_ch.get_command.call_count >= 1
 
 
 def test_is_done():

@@ -3,6 +3,7 @@ from file_writer_control.WriteJob import WriteJob
 from file_writer_control.JobStatus import JobStatus, JobState
 from datetime import datetime
 from unittest.mock import Mock
+import pytest
 
 
 def test_default_members():
@@ -105,24 +106,30 @@ def test_set_stop_now_with_id():
 def test_is_not_done():
     worker_finder_mock = Mock()
     test_job = WriteJob("{}", "some_file_name", "some_broker", datetime.now())
-    test_job_status = JobStatus(test_job.job_id)
-    test_job_status.service_id = "some_service_id"
-    test_job_status.state = JobState.ERROR
-    worker_finder_mock.get_job_status.return_value = test_job_status
+    worker_finder_mock.get_job_state.return_value = JobState.ERROR
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
-    assert not under_test.is_done()
-    worker_finder_mock.get_job_state.assert_called_once_with(test_job.job_id)
+    with pytest.raises(RuntimeError):
+        under_test.is_done()
+    assert worker_finder_mock.get_job_state.call_count >= 1
+
+
+def test_timed_out():
+    worker_finder_mock = Mock()
+    test_job = WriteJob("{}", "some_file_name", "some_broker", datetime.now())
+    worker_finder_mock.get_job_state.return_value = JobState.TIMEOUT
+    under_test = JobHandler(worker_finder_mock)
+    under_test.start_job(test_job)
+    with pytest.raises(RuntimeError):
+        under_test.is_done()
+    assert worker_finder_mock.get_job_state.call_count >= 1
 
 
 def test_is_done():
     worker_finder_mock = Mock()
     test_job = WriteJob("{}", "some_file_name", "some_broker", datetime.now())
-    test_job_status = JobStatus(test_job.job_id)
-    test_job_status.service_id = "some_service_id"
-    test_job_status.state = JobState.DONE
-    worker_finder_mock.get_job_status.return_value = test_job_status
+    worker_finder_mock.get_job_state.return_value = JobState.DONE
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
-    assert not under_test.is_done()
+    assert under_test.is_done()
     worker_finder_mock.get_job_state.assert_called_once_with(test_job.job_id)

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 
 JOB_STATUS_TIMEOUT = timedelta(seconds=5)
 
+
 class JobState(Enum):
     """
     The state of a job.
@@ -53,9 +54,9 @@ class JobStatus:
         :param current_time: The current time
         """
         if (
-                self.state != JobState.DONE
-                and self.state != JobState.ERROR
-                and current_time - self.last_update > JOB_STATUS_TIMEOUT
+            self.state != JobState.DONE
+            and self.state != JobState.ERROR
+            and current_time - self.last_update > JOB_STATUS_TIMEOUT
         ):
             self._state = JobState.TIMEOUT
 
