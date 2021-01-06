@@ -1,4 +1,4 @@
-from file_writer_control.WriteJob import generate_job_id, WriteJob
+from file_writer_control.WriteJob import WriteJob
 import re
 import platform
 import os
