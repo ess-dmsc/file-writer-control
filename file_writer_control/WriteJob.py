@@ -25,7 +25,7 @@ class WriteJob:
     ):
         self.structure = nexus_structure
         self.file = file_name
-        self.job_id = uuid.uuid1()
+        self.job_id = str(uuid.uuid1())
         self.start = start_time
         if stop_time is None:
             self.stop = self.start + timedelta(days=365.25 * 10)
@@ -41,7 +41,7 @@ class WriteJob:
         """
         Generate a new job id. Should be called if an attempt at starting this write job fails and another attempt is made.
         """
-        self.job_id = uuid.uuid1()
+        self.job_id = str(uuid.uuid1())
 
     @property
     def service_id(self) -> str:
