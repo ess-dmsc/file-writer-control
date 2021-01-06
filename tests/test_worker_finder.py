@@ -35,7 +35,6 @@ def test_try_send_stop_time():
     stop_time = datetime.now()
     under_test = WorkerFinderBase(test_topic, cmd_channel_mock, producer_mock)
     result = under_test.try_send_stop_time(service_id, job_id, stop_time)
-    assert result.command_id.find("STOP_TIME") != -1
     cmd_channel_mock.add_command_id.assert_called_once_with(
         job_id=job_id, command_id=result.command_id
     )
@@ -57,7 +56,6 @@ def test_try_send_stop_now():
     test_topic = "some topic"
     under_test = WorkerFinderBase(test_topic, cmd_channel_mock, producer_mock)
     result = under_test.try_send_stop_now(service_id, job_id)
-    assert result.command_id.find("STOP_NOW") != -1
     cmd_channel_mock.add_command_id.assert_called_once_with(
         job_id=job_id, command_id=result.command_id
     )
