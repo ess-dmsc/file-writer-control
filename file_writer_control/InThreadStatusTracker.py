@@ -6,7 +6,7 @@ from streaming_data_types.finished_writing_wrdn import (
     FILE_IDENTIFIER as STOPPED_IDENTIFIER,
 )
 from datetime import datetime, timedelta
-from streaming_data_types.utils import get_schema
+from streaming_data_types.utils import _get_schema
 from streaming_data_types import deserialise_x5f2 as deserialise_status
 from streaming_data_types import deserialise_answ as deserialise_answer
 from streaming_data_types import deserialise_6s4t as deserialise_stop_time
@@ -53,7 +53,7 @@ class InThreadStatusTracker:
         Process a binary message.
         :param message: The binary message to be processed.
         """
-        current_schema = get_schema(message).encode("utf-8")
+        current_schema = _get_schema(message).encode("utf-8")
         update_time = datetime.now()
         msg_process_map = {
             ANSW_IDENTIFIER: lambda msg: self.process_answer(deserialise_answer(msg)),
