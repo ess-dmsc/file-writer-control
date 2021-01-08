@@ -9,7 +9,7 @@ from kafka import KafkaProducer
 from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 from datetime import datetime
 from streaming_data_types.run_stop_6s4t import serialise_6s4t as serialise_stop
-from file_writer_control.CommandId import generate_command_id
+import uuid
 
 
 class WorkerFinderBase:
@@ -54,7 +54,7 @@ class WorkerFinderBase:
         :param stop_time: The new stop time.
         :return: A CommandHandler instance for (more) easily checking the outcome of setting a new stop time.
         """
-        command_id = generate_command_id("STOP_TIME")
+        command_id = str(uuid.uuid1())
         message = serialise_stop(
             job_id=job_id,
             service_id=service_id,
@@ -73,7 +73,7 @@ class WorkerFinderBase:
         :param job_id: The job identifier of the currently running file-writer job.
         :return: A CommandHandler instance for (more) easily checking the outcome of the "stop now" command.
         """
-        command_id = generate_command_id("STOP_NOW")
+        command_id = str(uuid.uuid1())
         message = serialise_stop(
             job_id=job_id, service_id=service_id, command_id=command_id, stop_time=0
         )
