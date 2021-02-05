@@ -17,7 +17,7 @@ except Exception as error:
 
 setup(
     name="file_writer_control",
-    version="1.0.2",
+    version="1.1.0",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -26,5 +26,5 @@ setup(
     license="BSD 2-Clause License",
     packages=find_packages(exclude=["tests", "examples"]),
     python_requires=">=3.6.0",
-    install_requires=["kafka-python>=2.0", "ess-streaming-data-types>=0.9.6"],
+    install_requires=["kafka-python>=2.0", "ess-streaming-data-types>=0.10.0"],
 )
