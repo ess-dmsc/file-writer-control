@@ -65,9 +65,11 @@ class CommandStatus(object):
         if (
             self.state != CommandState.SUCCESS
             and self.state != CommandState.ERROR
+            and self.state != CommandState.TIMEOUT_RESPONSE
             and current_time - self.last_update > COMMAND_STATUS_TIMEOUT
         ):
             self._state = CommandState.TIMEOUT_RESPONSE
+            self._last_update = current_time
 
     @property
     def response_code(self) -> Optional[int]:

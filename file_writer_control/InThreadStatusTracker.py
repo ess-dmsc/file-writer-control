@@ -125,6 +125,7 @@ class InThreadStatusTracker:
             + list(self.known_commands.values())
         ):
             entity.check_if_outdated(now)
+        self.send_status_if_updated(now)
 
     def prune_dead_entities(self, current_time: datetime):
         """

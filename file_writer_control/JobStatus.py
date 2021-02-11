@@ -56,9 +56,11 @@ class JobStatus:
         if (
             self.state != JobState.DONE
             and self.state != JobState.ERROR
+            and self.state != JobState.TIMEOUT
             and current_time - self.last_update > JOB_STATUS_TIMEOUT
         ):
             self._state = JobState.TIMEOUT
+            self._last_update = current_time
 
     @property
     def job_id(self) -> str:
