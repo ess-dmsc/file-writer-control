@@ -22,6 +22,28 @@ def test_add_job_id():
     under_test.stop_thread()
 
 
+def test_timed_out():
+    under_test = CommandChannel("localhost:42/some_topic")
+    now = datetime.now()
+    test_worker = WorkerStatus("some_service_id")
+    test_worker.state = WorkerState.UNKNOWN
+    under_test.map_of_workers["some_id"] = test_worker
+
+    test_job = JobStatus("some_id")
+    test_job.state = JobState.WAITING
+    under_test.map_of_jobs["some_id"] = test_job
+
+    test_command = CommandStatus("some_id", "some_other_id")
+    test_command.state = CommandState.WAITING_RESPONSE
+    under_test.map_of_commands["some_id"] = test_command
+
+    time_diff = timedelta(minutes=5)
+    under_test.update_workers(now + time_diff)
+    assert under_test.map_of_commands["some_id"].state == CommandState.TIMEOUT_RESPONSE
+    assert under_test.map_of_jobs["some_id"].state == JobState.TIMEOUT
+    assert under_test.map_of_workers["some_id"].state == WorkerState.UNAVAILABLE
+
+
 def test_prune_old():
     under_test = CommandChannel("localhost:42/some_topic")
     now = datetime.now()
@@ -36,6 +58,8 @@ def test_prune_old():
     test_command = CommandStatus("some_id", "some_other_id")
     test_command.state = CommandState.SUCCESS
     under_test.map_of_commands["some_id"] = test_command
+
+    under_test.update_workers(now + timedelta(seconds=60))
 
     time_diff = timedelta(minutes=5)
     under_test.update_workers(now + DEAD_ENTITY_TIME_LIMIT - time_diff)

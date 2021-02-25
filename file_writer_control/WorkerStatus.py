@@ -56,6 +56,7 @@ class WorkerStatus(object):
             and current_time - self.last_update > STATUS_MESSAGE_TIMEOUT
         ):
             self._state = WorkerState.UNAVAILABLE
+            self._last_update = current_time
 
     @property
     def state(self) -> WorkerState:
