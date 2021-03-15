@@ -1,29 +1,34 @@
-from file_writer_control.InThreadStatusTracker import InThreadStatusTracker, DEAD_ENTITY_TIME_LIMIT
+from datetime import datetime, timedelta
 from queue import Queue
-from streaming_data_types.status_x5f2 import StatusMessage
-from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
-from streaming_data_types.run_start_pl72 import RunStartInfo
-from streaming_data_types.run_stop_6s4t import RunStopInfo
+from unittest.mock import Mock
+
+from streaming_data_types import deserialise_6s4t as deserialise_stop
+from streaming_data_types import deserialise_answ as deserialise_answer
+from streaming_data_types import deserialise_pl72 as deserialise_start
+from streaming_data_types import deserialise_wrdn as deserialise_done
+from streaming_data_types import deserialise_x5f2 as deserialise_status
+from streaming_data_types import serialise_6s4t as serialise_stop
+from streaming_data_types import serialise_answ as serialise_answer
+from streaming_data_types import serialise_pl72 as serialise_start
+from streaming_data_types import serialise_wrdn as serialise_done
+from streaming_data_types import serialise_x5f2 as serialise_status
 from streaming_data_types.action_response_answ import (
     ActionOutcome,
     ActionType,
     Response,
 )
-from file_writer_control.JobStatus import JobStatus, JobState
-from file_writer_control.CommandStatus import CommandStatus, CommandState
-from datetime import datetime, timedelta
-from unittest.mock import Mock
-from streaming_data_types import serialise_pl72 as serialise_start
-from streaming_data_types import deserialise_pl72 as deserialise_start
-from streaming_data_types import serialise_6s4t as serialise_stop
-from streaming_data_types import deserialise_6s4t as deserialise_stop
-from streaming_data_types import serialise_answ as serialise_answer
-from streaming_data_types import deserialise_answ as deserialise_answer
-from streaming_data_types import serialise_wrdn as serialise_done
-from streaming_data_types import deserialise_wrdn as deserialise_done
-from streaming_data_types import serialise_x5f2 as serialise_status
-from streaming_data_types import deserialise_x5f2 as deserialise_status
 from streaming_data_types.finished_writing_wrdn import WritingFinished
+from streaming_data_types.run_start_pl72 import RunStartInfo
+from streaming_data_types.run_stop_6s4t import RunStopInfo
+from streaming_data_types.status_x5f2 import StatusMessage
+
+from file_writer_control.CommandStatus import CommandState, CommandStatus
+from file_writer_control.InThreadStatusTracker import (
+    DEAD_ENTITY_TIME_LIMIT,
+    InThreadStatusTracker,
+)
+from file_writer_control.JobStatus import JobState, JobStatus
+from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
 
 
 def test_process_status_once():

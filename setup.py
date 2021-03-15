@@ -1,5 +1,6 @@
 import os
-from setuptools import setup, find_packages
+
+from setuptools import find_packages, setup
 
 DESCRIPTION = (
     "A small Python library for controlling the ESS kafka-to-nexus file-writer."

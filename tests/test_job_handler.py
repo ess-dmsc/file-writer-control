@@ -1,9 +1,11 @@
-from file_writer_control.JobHandler import JobHandler
-from file_writer_control.WriteJob import WriteJob
-from file_writer_control.JobStatus import JobStatus, JobState
 from datetime import datetime
 from unittest.mock import Mock
+
 import pytest
+
+from file_writer_control.JobHandler import JobHandler
+from file_writer_control.JobStatus import JobState, JobStatus
+from file_writer_control.WriteJob import WriteJob
 
 
 def test_default_members():

@@ -1,9 +1,10 @@
-from file_writer_control.CommandChannel import CommandChannel
-from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
-from file_writer_control.JobStatus import JobStatus, JobState
-from file_writer_control.CommandStatus import CommandStatus, CommandState
 from datetime import datetime, timedelta
+
+from file_writer_control.CommandChannel import CommandChannel
+from file_writer_control.CommandStatus import CommandState, CommandStatus
 from file_writer_control.InThreadStatusTracker import DEAD_ENTITY_TIME_LIMIT
+from file_writer_control.JobStatus import JobState, JobStatus
+from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
 
 
 def test_add_job_id():

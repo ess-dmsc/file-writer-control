@@ -1,13 +1,14 @@
-from file_writer_control.CommandHandler import CommandHandler
-from file_writer_control.WorkerFinder import WorkerFinder
-from file_writer_control.WriteJob import WriteJob
-from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
-from file_writer_control.JobStatus import JobState
-from random import randrange
+import atexit
 import threading
 import time
+from random import randrange
 from typing import List
-import atexit
+
+from file_writer_control.CommandHandler import CommandHandler
+from file_writer_control.JobStatus import JobState
+from file_writer_control.WorkerFinder import WorkerFinder
+from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
+from file_writer_control.WriteJob import WriteJob
 
 START_JOB_TIMEOUT = 30  # Seconds
 SEND_JOB_TIMEOUT = 10  # Seconds

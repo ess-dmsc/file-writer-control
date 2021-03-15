@@ -1,5 +1,6 @@
-from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
 import time
+
+from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
 
 
 def print_current_state(channel: WorkerCommandChannel):

@@ -13,5 +13,3 @@ repos:
     hooks:
     - id: isort
       args: ["--profile", "black"]
-
-
