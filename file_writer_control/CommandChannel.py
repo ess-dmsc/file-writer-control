@@ -1,19 +1,20 @@
+import atexit
 import threading
+from datetime import datetime
 from queue import Queue
-from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
+from typing import Dict, List, Union
+
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
-from typing import List, Union, Dict
-import atexit
-from datetime import datetime
 
-from file_writer_control.InThreadStatusTracker import (
-    InThreadStatusTracker,
-    DEAD_ENTITY_TIME_LIMIT,
-)
-from file_writer_control.WorkerStatus import WorkerStatus
-from file_writer_control.JobStatus import JobStatus
 from file_writer_control.CommandStatus import CommandStatus
+from file_writer_control.InThreadStatusTracker import (
+    DEAD_ENTITY_TIME_LIMIT,
+    InThreadStatusTracker,
+)
+from file_writer_control.JobStatus import JobStatus
+from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
+from file_writer_control.WorkerStatus import WorkerStatus
 
 
 def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queue):

@@ -1,0 +1,8 @@
+
+-r requirements.txt
+pre-commit
+# Fixed to same version as in pre-commit hooks
+black==20.8b1
+flake8==3.8.4
+isort==5.7.0
+

@@ -1,15 +1,17 @@
-from file_writer_control.WorkerStatus import WorkerStatus
-from file_writer_control.WriteJob import WriteJob
-from file_writer_control.JobStatus import JobState, JobStatus
-from file_writer_control.CommandStatus import CommandStatus
+import uuid
+from datetime import datetime
 from typing import List
+
+from kafka import KafkaProducer
+from streaming_data_types.run_stop_6s4t import serialise_6s4t as serialise_stop
+
 from file_writer_control.CommandChannel import CommandChannel
 from file_writer_control.CommandHandler import CommandHandler
-from kafka import KafkaProducer
+from file_writer_control.CommandStatus import CommandStatus
+from file_writer_control.JobStatus import JobState, JobStatus
 from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
-from datetime import datetime
-from streaming_data_types.run_stop_6s4t import serialise_6s4t as serialise_stop
-import uuid
+from file_writer_control.WorkerStatus import WorkerStatus
+from file_writer_control.WriteJob import WriteJob
 
 
 class WorkerFinderBase:

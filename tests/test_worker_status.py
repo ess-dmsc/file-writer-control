@@ -1,5 +1,6 @@
-from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
 import pytest
+
+from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
 
 
 def test_init():

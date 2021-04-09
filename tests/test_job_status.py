@@ -1,5 +1,6 @@
 import pytest
-from file_writer_control.JobStatus import JobStatus, JobState
+
+from file_writer_control.JobStatus import JobState, JobStatus
 
 
 def test_update_status_exception():

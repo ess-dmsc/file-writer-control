@@ -1,5 +1,6 @@
-from file_writer_control.CommandStatus import CommandStatus, CommandState
 import pytest
+
+from file_writer_control.CommandStatus import CommandState, CommandStatus
 
 
 def test_init():

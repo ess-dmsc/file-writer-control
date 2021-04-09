@@ -1,5 +1,5 @@
-from enum import Enum, auto
 from datetime import datetime, timedelta
+from enum import Enum, auto
 
 JOB_STATUS_TIMEOUT = timedelta(seconds=5)
 

@@ -1,9 +1,10 @@
-from file_writer_control.WorkerFinder import WorkerFinder
-from file_writer_control.WriteJob import WriteJob
 from kafka import KafkaProducer
-from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
+
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.CommandStatus import CommandState
+from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
+from file_writer_control.WorkerFinder import WorkerFinder
+from file_writer_control.WriteJob import WriteJob
 
 
 class WorkerJobPool(WorkerFinder):
