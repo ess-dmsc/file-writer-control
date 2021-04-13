@@ -65,3 +65,4 @@ Then, from the *file-writer-control* root directory, run the following command:
 pip install --user -e ./
 ```
 
+## Uploadig package to *pypi*

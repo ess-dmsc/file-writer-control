@@ -17,7 +17,7 @@ except Exception as error:
 
 setup(
     name="file_writer_control",
-    version="1.1.0",
+    version="1.1.1",
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
