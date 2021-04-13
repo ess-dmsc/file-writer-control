@@ -1,19 +1,21 @@
+from datetime import datetime
+
+import pytest
+from streaming_data_types.action_response_answ import (
+    ActionOutcome,
+    ActionType,
+    Response,
+)
+from streaming_data_types.status_x5f2 import StatusMessage
+
+from file_writer_control.CommandStatus import CommandState
+from file_writer_control.JobStatus import JobState
 from file_writer_control.StateExtractor import (
     extract_job_state_from_answer,
     extract_state_from_command_answer,
     extract_worker_state_from_status,
 )
 from file_writer_control.WorkerStatus import WorkerState
-from file_writer_control.JobStatus import JobState
-from file_writer_control.CommandStatus import CommandState
-from streaming_data_types.status_x5f2 import StatusMessage
-from streaming_data_types.action_response_answ import (
-    Response,
-    ActionOutcome,
-    ActionType,
-)
-from datetime import datetime
-import pytest
 
 
 @pytest.mark.parametrize(

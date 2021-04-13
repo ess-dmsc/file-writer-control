@@ -1,7 +1,9 @@
 from unittest.mock import Mock
+
+import pytest
+
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.CommandStatus import CommandState, CommandStatus
-import pytest
 
 
 def test_get_state_no_id():

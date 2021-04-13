@@ -41,8 +41,24 @@ builders = pipeline_builder.createBuilders { container ->
       /opt/miniconda/bin/conda init bash
       export PATH=/opt/miniconda/bin:$PATH
       python --version
-      python -m pip install --user -r ${project}/requirements.txt
+      python -m pip install --user -r ${project}/requirements-dev.txt
       python -m pip install --user -r ${project}/requirements-jenkins.txt
+    """
+  } // stage
+
+  pipeline_builder.stage("${container.key}: Formatting (black) ") {
+    container.sh """
+      export PATH=/opt/miniconda/bin:$PATH
+      cd ${project}
+      python -m black --check .
+    """
+  } // stage
+
+  pipeline_builder.stage("${container.key}: Analysis (flake8) ") {
+    container.sh """
+      export PATH=/opt/miniconda/bin:$PATH
+      cd ${project}
+      python -m flake8
     """
   } // stage
 

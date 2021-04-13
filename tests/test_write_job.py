@@ -1,13 +1,9 @@
-from file_writer_control.WriteJob import WriteJob
-import re
-import platform
-import os
-from math import fabs
-import time
-from zlib import adler32
-from datetime import datetime, timedelta
 from copy import copy
+from datetime import datetime, timedelta
+
 from streaming_data_types import deserialise_pl72
+
+from file_writer_control.WriteJob import WriteJob
 
 
 def test_write_generate_job_id():

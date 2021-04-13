@@ -1,10 +1,7 @@
-from datetime import datetime, timedelta
-from streaming_data_types import serialise_pl72
-import platform
-import os
-from zlib import adler32
-from random import randint
 import uuid
+from datetime import datetime, timedelta
+
+from streaming_data_types import serialise_pl72
 
 
 class WriteJob:

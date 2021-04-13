@@ -1,5 +1,6 @@
-from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 import pytest
+
+from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 
 
 def test_success_1():

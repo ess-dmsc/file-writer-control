@@ -1,9 +1,10 @@
-from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
-from unittest.mock import Mock, patch
-from file_writer_control.WorkerStatus import WorkerStatus, WorkerState
-from file_writer_control.WriteJob import WriteJob
-from datetime import datetime, timedelta
 import time
+from datetime import datetime, timedelta
+from unittest.mock import Mock, patch
+
+from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
+from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
+from file_writer_control.WriteJob import WriteJob
 
 
 def get_test_job():
@@ -11,7 +12,6 @@ def get_test_job():
     file_name = "some file name"
     start_time = datetime.now()
     stop_time = start_time + timedelta(seconds=10)
-    service_id = "some service id"
     broker = "some broker"
     instrument_name = "some instrument name"
     metadata = "some meta data"

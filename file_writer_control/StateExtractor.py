@@ -1,14 +1,16 @@
+from json import loads
+from typing import Optional
+
 from streaming_data_types.action_response_answ import (
-    ActionResponse,
     ActionOutcome,
+    ActionResponse,
     ActionType,
 )
-from json import loads
+from streaming_data_types.status_x5f2 import StatusMessage
+
 from file_writer_control.CommandStatus import CommandState
 from file_writer_control.JobStatus import JobState
-from streaming_data_types.status_x5f2 import StatusMessage
 from file_writer_control.WorkerStatus import WorkerState
-from typing import Optional
 
 
 def extract_worker_state_from_status(status: StatusMessage) -> WorkerState:

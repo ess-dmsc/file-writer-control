@@ -1,9 +1,10 @@
+from datetime import datetime
+from typing import Union
+
+from file_writer_control.CommandHandler import CommandHandler
+from file_writer_control.JobStatus import JobState
 from file_writer_control.WorkerFinder import WorkerFinder
 from file_writer_control.WriteJob import WriteJob
-from file_writer_control.CommandHandler import CommandHandler
-from datetime import datetime
-from file_writer_control.JobStatus import JobState
-from typing import Union
 
 
 class JobHandler:
