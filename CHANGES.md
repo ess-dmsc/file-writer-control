@@ -1,5 +1,8 @@
 # Version changes
 
+## Version 1.1.2
+
+* Slightly better exceptions when unable to connect to a broker.
 
 ## Version 1.0.2
 
