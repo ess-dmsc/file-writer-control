@@ -130,6 +130,6 @@ class WorkerFinder(WorkerFinderBase):
             temp_producer = KafkaProducer(bootstrap_servers=[command_url.host_port])
         except NoBrokersAvailable as e:
             raise NoBrokersAvailable(
-                f"Unable to find brokers (or connect to brokers) on address: \"{command_url.host_port}\""
+                f'Unable to find brokers (or connect to brokers) on address: "{command_url.host_port}"'
             ) from e
         super().__init__(command_url.topic, temp_cmd_ch, temp_producer)

@@ -27,7 +27,7 @@ class WorkerJobPool(WorkerFinder):
             )
         except NoBrokersAvailable as e:
             raise NoBrokersAvailable(
-                f"Unable to find brokers (or connect to brokers) on address: \"{self._job_pool.host_port}\""
+                f'Unable to find brokers (or connect to brokers) on address: "{self._job_pool.host_port}"'
             ) from e
 
     def _send_pool_message(self, message: bytes):

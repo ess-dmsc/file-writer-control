@@ -84,7 +84,9 @@ class JobStatus:
         elif self._service_id == new_service_id:
             return
         else:
-            raise RuntimeError(f"Can not set service_id to \"{new_service_id}\" as it has already been set to \"{self._service_id}\".")
+            raise RuntimeError(
+                f'Can not set service_id to "{new_service_id}" as it has already been set to "{self._service_id}".'
+            )
 
     @property
     def last_update(self) -> datetime:
