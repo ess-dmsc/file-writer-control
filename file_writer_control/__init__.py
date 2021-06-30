@@ -1,3 +1,4 @@
+from file_writer_control._version import version
 from file_writer_control.JobHandler import JobHandler
 from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
 from file_writer_control.WorkerJobPool import WorkerJobPool

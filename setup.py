@@ -1,6 +1,7 @@
 import os
 
 from setuptools import find_packages, setup
+from file_writer_control._version import version
 
 DESCRIPTION = (
     "A small Python library for controlling the ESS kafka-to-nexus file-writer."
@@ -18,7 +19,7 @@ except Exception as error:
 
 setup(
     name="file_writer_control",
-    version="1.1.2",
+    version=version,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",

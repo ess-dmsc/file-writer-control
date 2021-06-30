@@ -66,3 +66,19 @@ pip install --user -e ./
 ```
 
 ## Uploadig package to *pypi*
+
+```bash
+rm -rf build dist
+```
+
+```bash
+python setup.py sdist bdist_wheel
+```
+
+```bash
+twine check dist/*
+```
+
+```bash
+twine upload dist/*
+```
