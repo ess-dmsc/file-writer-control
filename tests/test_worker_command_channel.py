@@ -1,6 +1,7 @@
 import time
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
+from unittest import skip
 
 from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
 from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
@@ -28,7 +29,7 @@ def get_test_job():
     )
 
 
-@patch("file_writer_control.WorkerCommandChannel.super")
+@patch("file_writer_control.WorkerCommandChannel.__init__", return_value=None)
 def test_list_idle_workers(TestClass):
     under_test = WorkerCommandChannel("localhost:9090/hello")
     all_workers = [
@@ -51,7 +52,10 @@ def test_list_idle_workers(TestClass):
 thread_start_wait = 5
 
 
-@patch("file_writer_control.WorkerCommandChannel.super")
+@skip
+@patch(
+    "file_writer_control.WorkerCommandChannel.WorkerFinder.__init__", return_value=None
+)
 def test_no_workers_within_5_seconds(TestClass):
     under_test = WorkerCommandChannel("localhost:9090/hello")
     under_test.get_idle_workers = Mock(return_value=[])
@@ -69,7 +73,10 @@ def test_no_workers_within_5_seconds(TestClass):
     )
 
 
-@patch("file_writer_control.WorkerCommandChannel.super")
+@skip
+@patch(
+    "file_writer_control.WorkerCommandChannel.WorkerFinder.__init__", return_value=None
+)
 def test_start_job_within_5_seconds(TestClass):
     under_test = WorkerCommandChannel("localhost:9090/hello")
     under_test.command_topic = "some_topic"
