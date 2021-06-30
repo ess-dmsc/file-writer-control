@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List
 
 from kafka import KafkaProducer
+from kafka.errors import NoBrokersAvailable
 from streaming_data_types.run_stop_6s4t import serialise_6s4t as serialise_stop
 
 from file_writer_control.CommandChannel import CommandChannel
@@ -125,5 +126,10 @@ class WorkerFinder(WorkerFinderBase):
     def __init__(self, command_topic_url: str):
         temp_cmd_ch = CommandChannel(command_topic_url)
         command_url = KafkaTopicUrl(command_topic_url)
-        temp_producer = KafkaProducer(bootstrap_servers=[command_url.host_port])
+        try:
+            temp_producer = KafkaProducer(bootstrap_servers=[command_url.host_port])
+        except NoBrokersAvailable:
+            raise NoBrokersAvailable(
+                f"Unable to find brokers (or connect to brokers) on address: {command_url.host_port}"
+            )
         super().__init__(command_url.topic, temp_cmd_ch, temp_producer)

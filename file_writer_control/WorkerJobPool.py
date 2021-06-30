@@ -1,4 +1,5 @@
 from kafka import KafkaProducer
+from kafka.errors import NoBrokersAvailable
 
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.CommandStatus import CommandState
@@ -20,9 +21,14 @@ class WorkerJobPool(WorkerFinder):
         """
         super().__init__(command_topic_url)
         self._job_pool = KafkaTopicUrl(job_topic_url)
-        self._pool_producer = KafkaProducer(
-            bootstrap_servers=[self._job_pool.host_port]
-        )
+        try:
+            self._pool_producer = KafkaProducer(
+                bootstrap_servers=[self._job_pool.host_port]
+            )
+        except NoBrokersAvailable:
+            raise NoBrokersAvailable(
+                f"Unable to find brokers (or connect to brokers) on address: {self._job_pool.host_port}"
+            )
 
     def _send_pool_message(self, message: bytes):
         """
