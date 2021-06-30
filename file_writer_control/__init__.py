@@ -5,4 +5,3 @@ from file_writer_control.WorkerJobPool import WorkerJobPool
 from file_writer_control.WriteJob import WriteJob
 from file_writer_control.CommandStatus import CommandState
 from file_writer_control.JobStatus import JobState
-
