@@ -31,7 +31,7 @@ def get_test_job():
 
 @patch("file_writer_control.WorkerCommandChannel.__init__", return_value=None)
 def test_list_idle_workers(TestClass):
-    under_test = WorkerCommandChannel("localhost:9090/hello")
+    under_test = TestClass("localhost:9090/hello")
     all_workers = [
         WorkerStatus("id1"),
         WorkerStatus("id2"),
@@ -53,9 +53,7 @@ thread_start_wait = 5
 
 
 @skip
-@patch(
-    "file_writer_control.WorkerCommandChannel.WorkerFinder.__init__", return_value=None
-)
+@patch("file_writer_control.WorkerCommandChannel.super", return_value=None)
 def test_no_workers_within_5_seconds(TestClass):
     under_test = WorkerCommandChannel("localhost:9090/hello")
     under_test.get_idle_workers = Mock(return_value=[])
@@ -78,7 +76,7 @@ def test_no_workers_within_5_seconds(TestClass):
     "file_writer_control.WorkerCommandChannel.WorkerFinder.__init__", return_value=None
 )
 def test_start_job_within_5_seconds(TestClass):
-    under_test = WorkerCommandChannel("localhost:9090/hello")
+    under_test = TestClass("localhost:9090/hello")
     under_test.command_topic = "some_topic"
     under_test.get_idle_workers = Mock(return_value=[WorkerStatus("id1")])
     under_test.message_producer = Mock()
