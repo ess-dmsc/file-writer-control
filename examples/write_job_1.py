@@ -1,9 +1,9 @@
 import time
 from datetime import datetime, timedelta
 
-from file_writer_control.JobHandler import JobHandler
-from file_writer_control.WorkerCommandChannel import WorkerCommandChannel
-from file_writer_control.WriteJob import WriteJob
+from file_writer_control import JobHandler
+from file_writer_control import WorkerCommandChannel
+from file_writer_control import WriteJob
 
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"

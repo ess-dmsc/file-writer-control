@@ -1,5 +1,16 @@
 # Version changes
 
+## Version 1.1.4
+
+* Simplify importing of classes.
+* Fixed issue with re-used job identifiers.
+
+## Version 1.1.3
+
+* Added the version to the installed package.
+* Minor exception message improvements.
+* Minor documentation updates.
+
 ## Version 1.1.2
 
 * Slightly better exceptions when unable to connect to a broker.

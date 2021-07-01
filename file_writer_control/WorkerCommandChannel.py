@@ -94,5 +94,6 @@ class WorkerCommandChannel(WorkerFinder):
                             return
                         elif job_started_time + SEND_JOB_TIMEOUT < time.time():
                             waiting_to_send_job = True
+                            do_job.generate_new_job_id()
                         break
             time.sleep(1.0 / loop_poll_rate)
