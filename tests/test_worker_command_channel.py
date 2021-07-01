@@ -31,7 +31,7 @@ def get_test_job():
 
 @patch("file_writer_control.WorkerCommandChannel.__init__", return_value=None)
 def test_list_idle_workers(TestClass):
-    under_test = TestClass("localhost:9090/hello")
+    under_test = WorkerCommandChannel("localhost:9090/hello")
     all_workers = [
         WorkerStatus("id1"),
         WorkerStatus("id2"),
