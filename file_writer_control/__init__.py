@@ -13,5 +13,5 @@ __all__ = [
     "WriteJob",
     "CommandState",
     "JobState",
-    "version"
+    "version",
 ]
