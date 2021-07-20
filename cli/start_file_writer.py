@@ -1,5 +1,9 @@
 import argparse
 import os
+from datetime import datetime
+from time import time as current_time
+
+from file_writer_control import JobHandler, WorkerCommandChannel, WriteJob
 
 
 def cli_parser() -> argparse.Namespace:
@@ -49,6 +53,33 @@ def cli_parser() -> argparse.Namespace:
     return args
 
 
+def start_file_writer(args: argparse.Namespace) -> None:
+    file_name = args.filename
+    host = args.broker
+    topic = args.topic
+    config = args.config
+
+    command_channel = WorkerCommandChannel(f"{host}/{topic}")
+    job_handler = JobHandler(worker_finder=command_channel)
+
+    with open(config, "r") as f:
+        nexus_structure = f.read()
+
+    write_job = WriteJob(
+        nexus_structure,
+        file_name,
+        host,
+        datetime.now(),
+    )
+
+    start_handler = job_handler.start_job(write_job)
+    timeout = int(current_time()) + 5
+
+    while not start_handler.is_done():
+        if int(current_time()) > timeout:
+            raise ValueError("Timeout.")
+
+
 def validate_namespace(args: argparse.Namespace) -> None:
     argument_list = [args.filename, args.config, args.broker, args.topic]
     for arg in argument_list:
@@ -83,3 +114,4 @@ def is_empty(arg: str) -> None:
 if __name__ == "__main__":
     cli_args = cli_parser()
     validate_namespace(cli_args)
+    start_file_writer(cli_args)
