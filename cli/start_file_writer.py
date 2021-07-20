@@ -47,6 +47,13 @@ def cli_parser() -> argparse.Namespace:
         required=True,
         help="Name of the Kafka topic to be consumed.",
     )
+    fw_parser.add_argument(
+        "--timeout",
+        metavar="ack_timeout",
+        type=int,
+        default=5,
+        help="How long to wait for timeout on acknowledgement.",
+    )
 
     args = fw_parser.parse_args()
 
@@ -58,6 +65,7 @@ def start_file_writer(args: argparse.Namespace) -> None:
     host = args.broker
     topic = args.topic
     config = args.config
+    ack_timeout = args.timeout
 
     command_channel = WorkerCommandChannel(f"{host}/{topic}")
     job_handler = JobHandler(worker_finder=command_channel)
@@ -73,7 +81,7 @@ def start_file_writer(args: argparse.Namespace) -> None:
     )
 
     start_handler = job_handler.start_job(write_job)
-    timeout = int(current_time()) + 5
+    timeout = int(current_time()) + ack_timeout
 
     while not start_handler.is_done():
         if int(current_time()) > timeout:
