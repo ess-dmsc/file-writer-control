@@ -22,16 +22,23 @@ def cli_parser() -> argparse.Namespace:
         "--config",
         metavar="json_config",
         type=str,
+        required=True,
         help="Path to JSON config file.",
     )
     fw_parser.add_argument(
-        "-b", "--broker", metavar="kafka_broker", type=str, help="Kafka broker port."
+        "-b",
+        "--broker",
+        metavar="kafka_broker",
+        type=str,
+        required=True,
+        help="Kafka broker port.",
     )
     fw_parser.add_argument(
         "-t",
         "--topic",
         metavar="consume_topic",
         type=str,
+        required=True,
         help="Name of the Kafka topic to be consumed.",
     )
 
@@ -41,21 +48,28 @@ def cli_parser() -> argparse.Namespace:
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
-    # Validate the filename
-    file_name = args.filename
-    if not file_name or file_name.isspace():
-        raise ValueError("File name cannot be an empty string.")
-    if len(file_name.split(".")) < 2 or file_name.split(".")[1] != "nxs":
-        raise ValueError(
-            "Output should be a NeXus file. Try again with "
-            f'{file_name.split(".")[0]}.nxs'
-        )
+    argument_list = [args.filename, args.config, args.broker, args.topic]
+    for arg in argument_list:
+        is_empty(arg)
 
-    # Validate JSON config
+    # Validate extensions for filename and config
+    check_file_extension(args.filename, "nxs")
+    check_file_extension(args.config, "json")
+
+    # Validate JSON config path
     config_file = args.config
     if not os.path.isfile(config_file):
         raise ValueError(
             "The configuration file " f"`{config_file}` " "does not exist."
+        )
+
+
+def check_file_extension(arg: str, extension: str) -> None:
+    if len(arg.split(".")) < 2 or arg.split(".")[1] != extension:
+        raise ValueError(
+            f"The argument, {arg}, has incorrect extension. "
+            "Please use `.nxs` for output file and `.json` for "
+            "the configuration."
         )
 
 
