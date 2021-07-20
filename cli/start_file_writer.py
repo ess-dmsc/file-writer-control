@@ -7,7 +7,9 @@ def cli_parser() -> argparse.Namespace:
     Parser for the command line interface.
     """
 
-    fw_parser = argparse.ArgumentParser(description="FileWriter Starter")
+    fw_parser = argparse.ArgumentParser(
+        fromfile_prefix_chars="@", description="FileWriter Starter"
+    )
 
     fw_parser.add_argument(
         "-f",
