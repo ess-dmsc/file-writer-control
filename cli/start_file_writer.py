@@ -1,10 +1,11 @@
 import argparse
 import os
+import time
 from datetime import datetime, timedelta
 from time import time as current_time
 from typing import Tuple
 
-from file_writer_control import JobHandler, WorkerCommandChannel, WriteJob
+from file_writer_control import JobHandler, JobState, WorkerCommandChannel, WriteJob
 
 
 def cli_parser() -> argparse.Namespace:
@@ -74,6 +75,8 @@ def file_writer(args: argparse.Namespace) -> None:
     if args.stop:
         stop_write_job(args.stop, job_handler, start_time, timeout)
 
+    inform_status(job_handler)
+
 
 def start_write_job(
     ack_timeout: float, job_handler: JobHandler, write_job: WriteJob
@@ -114,6 +117,16 @@ def prepare_write_job(args: argparse.Namespace) -> Tuple[float, JobHandler, Writ
         datetime.now(),
     )
     return ack_timeout, job_handler, write_job
+
+
+def inform_status(job_handler: JobHandler) -> None:
+    if job_handler.get_state() == JobState.WRITING:
+        print("Writing.", end="", flush=True)
+    while job_handler.get_state() == JobState.WRITING:
+        print(".", end="", flush=True)
+        time.sleep(1)
+        if job_handler.get_state() == JobState.DONE:
+            print("[DONE]")
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
