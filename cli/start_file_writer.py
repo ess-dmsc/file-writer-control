@@ -1,6 +1,6 @@
 import argparse
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from time import time as current_time
 
 from file_writer_control import JobHandler, WorkerCommandChannel, WriteJob
@@ -50,9 +50,15 @@ def cli_parser() -> argparse.Namespace:
     fw_parser.add_argument(
         "--timeout",
         metavar="ack_timeout",
-        type=int,
+        type=float,
         default=5,
         help="How long to wait for timeout on acknowledgement.",
+    )
+    fw_parser.add_argument(
+        "--stop",
+        metavar="stop_writing",
+        type=float,
+        help="How long the file will be written.",
     )
 
     args = fw_parser.parse_args()
@@ -82,10 +88,18 @@ def start_file_writer(args: argparse.Namespace) -> None:
 
     start_handler = job_handler.start_job(write_job)
     timeout = int(current_time()) + ack_timeout
+    start_time = datetime.now()
 
     while not start_handler.is_done():
         if int(current_time()) > timeout:
             raise ValueError("Timeout.")
+
+    if args.stop:
+        stop_time = start_time + timedelta(seconds=args.stop)
+        stop_handler = job_handler.set_stop_time(stop_time)
+        while not stop_handler.is_done() and not job_handler.is_done():
+            if int(current_time()) > timeout:
+                raise ValueError("Timeout.")
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
