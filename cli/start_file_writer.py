@@ -1,11 +1,16 @@
 import argparse
 import os
+import signal
+import sys
 import time
 from datetime import datetime, timedelta
 from time import time as current_time
 from typing import Tuple
 
 from file_writer_control import JobHandler, JobState, WorkerCommandChannel, WriteJob
+
+JOB_HANDLER: JobHandler
+ACK_TIMEOUT: float
 
 
 def cli_parser() -> argparse.Namespace:
@@ -69,20 +74,19 @@ def cli_parser() -> argparse.Namespace:
 
 
 def file_writer(args: argparse.Namespace) -> None:
-    ack_timeout, job_handler, write_job = prepare_write_job(args)
-    start_time, timeout = start_write_job(ack_timeout, job_handler, write_job)
+    write_job = prepare_write_job(args)
+    start_time, timeout = start_write_job(write_job)
 
     if args.stop:
-        stop_write_job(args.stop, job_handler, start_time, timeout)
+        stop_write_job(args.stop, start_time, timeout)
 
-    inform_status(job_handler)
+    inform_status()
 
 
-def start_write_job(
-    ack_timeout: float, job_handler: JobHandler, write_job: WriteJob
-) -> Tuple[datetime, float]:
-    start_handler = job_handler.start_job(write_job)
-    timeout = int(current_time()) + ack_timeout
+def start_write_job(write_job: WriteJob) -> Tuple[datetime, float]:
+
+    start_handler = JOB_HANDLER.start_job(write_job)
+    timeout = int(current_time()) + ACK_TIMEOUT
     start_time = datetime.now()
     while not start_handler.is_done():
         if int(current_time()) > timeout:
@@ -90,24 +94,35 @@ def start_write_job(
     return start_time, timeout
 
 
-def stop_write_job(
-    stop: float, job_handler: JobHandler, start_time: datetime, timeout: float
-) -> None:
+def stop_write_job(stop: float, start_time: datetime, timeout: float) -> None:
+
     stop_time = start_time + timedelta(seconds=stop)
-    stop_handler = job_handler.set_stop_time(stop_time)
-    while not stop_handler.is_done() and not job_handler.is_done():
+    stop_handler = JOB_HANDLER.set_stop_time(stop_time)
+    while not stop_handler.is_done() and not JOB_HANDLER.is_done():
         if int(current_time()) > timeout:
             raise ValueError("Timeout.")
 
 
-def prepare_write_job(args: argparse.Namespace) -> Tuple[float, JobHandler, WriteJob]:
+def stop_write_job_now() -> None:
+    while JOB_HANDLER.get_state() == JobState.WRITING:
+        JOB_HANDLER.stop_now()
+        time.sleep(1)
+        if JOB_HANDLER.get_state() == JobState.DONE:
+            print("FileWriter successfully stopped.")
+    sys.exit()
+
+
+def prepare_write_job(args: argparse.Namespace) -> WriteJob:
+    global JOB_HANDLER
+    global ACK_TIMEOUT
+
     file_name = args.filename
     host = args.broker
     topic = args.topic
     config = args.config
-    ack_timeout = args.timeout
+    ACK_TIMEOUT = args.timeout
     command_channel = WorkerCommandChannel(f"{host}/{topic}")
-    job_handler = JobHandler(worker_finder=command_channel)
+    JOB_HANDLER = JobHandler(worker_finder=command_channel)
     with open(config, "r") as f:
         nexus_structure = f.read()
     write_job = WriteJob(
@@ -116,16 +131,16 @@ def prepare_write_job(args: argparse.Namespace) -> Tuple[float, JobHandler, Writ
         host,
         datetime.now(),
     )
-    return ack_timeout, job_handler, write_job
+    return write_job
 
 
-def inform_status(job_handler: JobHandler) -> None:
-    if job_handler.get_state() == JobState.WRITING:
+def inform_status() -> None:
+    if JOB_HANDLER.get_state() == JobState.WRITING:
         print("Writing.", end="", flush=True)
-    while job_handler.get_state() == JobState.WRITING:
+    while JOB_HANDLER.get_state() == JobState.WRITING:
         print(".", end="", flush=True)
         time.sleep(1)
-        if job_handler.get_state() == JobState.DONE:
+        if JOB_HANDLER.get_state() == JobState.DONE:
             print("[DONE]")
 
 
@@ -160,7 +175,47 @@ def is_empty(arg: str) -> None:
         raise ValueError("A positional argument cannot be an empty string.")
 
 
+def ask_user_action(signum, frame):
+    user_action = """
+    
+    What would you like to do (type 1, 2, 3 or 4 and press Enter)?
+    
+    1- Stop FileWriter immediately
+    2- Stop FileWriter after a given time (seconds)
+    3- Exit CLI without terminating FileWriter
+    4- Continue
+    
+    """
+    choices = ["1", "2", "3", "4"]
+    choice = input(user_action)
+    if choice not in choices:
+        return
+
+    if choice == "1":
+        stop_write_job_now()
+    elif choice == "2":
+        set_time_and_stop()
+    elif choice == "3":
+        sys.exit()
+    else:
+        return
+
+
+def set_time_and_stop():
+    stop_time = input("Stop time in seconds = ")
+    try:
+        stop_time = float(stop_time)
+        timeout = int(current_time()) + ACK_TIMEOUT
+        stop_write_job(stop_time, datetime.now(), timeout)
+    except ValueError:
+        # The CLI will simply continue.
+        print("Input should be a float.")
+
+
 if __name__ == "__main__":
+    # Catch ctrl-c
+    signal.signal(signal.SIGINT, ask_user_action)
+    # Main
     cli_args = cli_parser()
     validate_namespace(cli_args)
     file_writer(cli_args)
