@@ -19,6 +19,7 @@ class WriteJob:
         instrument_name: str = "",
         run_name: str = "",
         metadata: str = "",
+        control_topic: str = "",
     ):
         self.structure = nexus_structure
         self.file = file_name
@@ -33,6 +34,7 @@ class WriteJob:
         self.instrument_name = instrument_name
         self.run_name = run_name
         self.metadata = metadata
+        self.control_topic = control_topic
 
     def generate_new_job_id(self):
         """
@@ -69,4 +71,5 @@ class WriteJob:
             instrument_name=self.instrument_name,
             run_name=self.run_name,
             metadata=self.metadata,
+            control_topic=self.control_topic,
         )
