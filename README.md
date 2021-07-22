@@ -48,7 +48,7 @@ Then, from the *file-writer-control* root directory, run the following command:
 pip install --user -e ./
 ```
 
-## Uploadig package to *pypi*
+## Uploading package to *pypi*
 
 ```bash
 rm -rf build dist
