@@ -5,7 +5,7 @@ import sys
 import time
 from datetime import datetime, timedelta
 from time import time as current_time
-from typing import Tuple
+from typing import Optional, Tuple
 
 from file_writer_control import JobHandler, JobState, WorkerCommandChannel, WriteJob
 
@@ -175,7 +175,7 @@ def is_empty(arg: str) -> None:
         raise ValueError("A positional argument cannot be an empty string.")
 
 
-def ask_user_action(signum, frame):
+def ask_user_action(signum, frame) -> Optional[None]:
     user_action = """
     
     What would you like to do (type 1, 2, 3 or 4 and press Enter)?
@@ -201,7 +201,7 @@ def ask_user_action(signum, frame):
         return
 
 
-def set_time_and_stop():
+def set_time_and_stop() -> None:
     stop_time = input("Stop time in seconds = ")
     try:
         stop_time = float(stop_time)
