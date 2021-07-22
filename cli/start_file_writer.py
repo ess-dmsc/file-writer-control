@@ -168,6 +168,7 @@ def check_file_extension(arg: str, extension: str) -> None:
             "Please use `.nxs` for output file and `.json` for "
             "the configuration."
         )
+    is_empty(arg.split(".")[0])
 
 
 def is_empty(arg: str) -> None:
