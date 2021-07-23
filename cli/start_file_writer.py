@@ -43,7 +43,7 @@ def cli_parser() -> argparse.Namespace:
         "--broker",
         metavar="kafka_broker",
         type=str,
-        required=True,
+        default="localhost:9092",
         help="Kafka broker port.",
     )
     fw_parser.add_argument(
