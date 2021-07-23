@@ -179,18 +179,17 @@ def is_empty(arg: str) -> None:
 def ask_user_action(signum, frame) -> Optional[None]:
     user_action = """
     
-    What would you like to do (type 1, 2, 3 or 4 and press Enter)?
+    What would you like to do (type 1, 2 or 3 and press Enter)?
     
     1- Stop FileWriter immediately
     2- Stop FileWriter after a given time (seconds)
     3- Exit CLI without terminating FileWriter
-    4- Continue
+    
+    Or any other key to Continue.
     
     """
-    choices = ["1", "2", "3", "4"]
+
     choice = input(user_action)
-    if choice not in choices:
-        return
 
     if choice == "1":
         stop_write_job_now()
