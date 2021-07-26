@@ -60,11 +60,10 @@ def cli_parser() -> argparse.Namespace:
     return args
 
 
-def create_job_handler(args):
+def create_job_handler(args, job_id):
     host = args.broker
     topic = args.topic
     command_channel = WorkerCommandChannel(f"{host}/{topic}")
-    job_id = args.stop if args.stop else args.stop_after[0]
     job_handler = JobHandler(worker_finder=command_channel, job_id=job_id)
     return job_handler
 
@@ -88,9 +87,22 @@ def stop_write_job(args, job_handler) -> None:
             raise ValueError("Timeout.")
 
 
+def verify_write_job(job_handler):
+    if job_handler.get_state() == JobState.WRITING:
+        print("The write process is confirmed. Stopping...")
+    else:
+        raise ValueError(
+            "There are no write jobs associated with the "
+            "given job id. Please check broker, topic and "
+            "id information and try again."
+        )
+
+
 if __name__ == "__main__":
     cli_args = cli_parser()
-    handler = create_job_handler(cli_args)
+    _id = cli_args.stop if cli_args.stop else cli_args.stop_after[0]
+    handler = create_job_handler(cli_args, _id)
+    verify_write_job(handler)
     if cli_args.stop_after:
         stop_write_job(cli_args, handler)
     stop_write_job_now(handler)
