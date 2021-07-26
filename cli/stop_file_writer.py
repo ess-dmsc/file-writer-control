@@ -1,4 +1,5 @@
 import argparse
+import sys
 import time
 from datetime import datetime, timedelta
 from time import time as current_time
@@ -100,6 +101,13 @@ def verify_write_job(job_handler):
 
 if __name__ == "__main__":
     cli_args = cli_parser()
+    if cli_args.stop and cli_args.stop_after:
+        print(
+            "Positional arguments [-s --stop] and [-sa --stop_after] cannot "
+            "be used simultaneously."
+        )
+        sys.exit()
+
     _id = cli_args.stop if cli_args.stop else cli_args.stop_after[0]
     handler = create_job_handler(cli_args, _id)
     verify_write_job(handler)
