@@ -1,5 +1,4 @@
 import argparse
-import sys
 import time
 from datetime import datetime, timedelta
 from time import time as current_time
@@ -21,7 +20,7 @@ def cli_parser() -> argparse.Namespace:
         "--stop",
         metavar="stop",
         type=str,
-        help="Name of the output file, e.g., `<filename>.nxs`.",
+        help="Stop FileWriter immediately.",
     )
     fw_parser.add_argument(
         "-sa",
@@ -29,7 +28,7 @@ def cli_parser() -> argparse.Namespace:
         metavar="stop_after",
         nargs=2,
         type=str,
-        help="Path to JSON config file.",
+        help="Stop FileWriter after a given time in seconds.",
     )
     fw_parser.add_argument(
         "-b",
@@ -65,6 +64,8 @@ def create_job_handler(args, job_id):
     topic = args.topic
     command_channel = WorkerCommandChannel(f"{host}/{topic}")
     job_handler = JobHandler(worker_finder=command_channel, job_id=job_id)
+    # Required for formation of the handler.
+    time.sleep(3)
     return job_handler
 
 
@@ -74,7 +75,6 @@ def stop_write_job_now(job_handler) -> None:
         time.sleep(1)
         if job_handler.get_state() == JobState.DONE:
             print("FileWriter successfully stopped.")
-    sys.exit()
 
 
 def stop_write_job(args, job_handler) -> None:
@@ -103,6 +103,8 @@ if __name__ == "__main__":
     _id = cli_args.stop if cli_args.stop else cli_args.stop_after[0]
     handler = create_job_handler(cli_args, _id)
     verify_write_job(handler)
+
     if cli_args.stop_after:
         stop_write_job(cli_args, handler)
-    stop_write_job_now(handler)
+    else:
+        stop_write_job_now(handler)
