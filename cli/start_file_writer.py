@@ -48,11 +48,11 @@ def cli_parser() -> argparse.Namespace:
     )
     fw_parser.add_argument(
         "-t",
-        "--topic",
+        "--command-status-topic",
         metavar="consume_topic",
         type=str,
         required=True,
-        help="Name of the Kafka topic to be consumed.",
+        help="Name of the Kafka topic to listen to commands and send status to.",
     )
     fw_parser.add_argument(
         "--timeout",
