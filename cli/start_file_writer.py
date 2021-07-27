@@ -104,11 +104,11 @@ def stop_write_job(stop: float, start_time: datetime, timeout: float) -> None:
 
 
 def stop_write_job_now() -> None:
-    while JOB_HANDLER.get_state() == JobState.WRITING:
-        JOB_HANDLER.stop_now()
-        time.sleep(1)
-        if JOB_HANDLER.get_state() == JobState.DONE:
-            print("FileWriter successfully stopped.")
+    if JOB_HANDLER.get_state() == JobState.WRITING:
+        JOB_HANDLER.set_stop_time(datetime.now())
+        while not JOB_HANDLER.is_done():
+            time.sleep(1)
+        print("FileWriter successfully stopped.")
     sys.exit()
 
 
@@ -179,15 +179,15 @@ def is_empty(arg: str) -> None:
 
 def ask_user_action(signum, frame) -> Optional[None]:
     user_action = """
-    
+
     What would you like to do (type 1, 2 or 3 and press Enter)?
-    
+
     1- Stop FileWriter immediately
     2- Stop FileWriter after a given time (seconds)
     3- Exit CLI without terminating FileWriter
-    
+
     Or any other key to Continue.
-    
+
     """
 
     choice = input(user_action)
