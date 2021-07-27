@@ -4,6 +4,7 @@ import time
 from datetime import datetime, timedelta
 from time import time as current_time
 
+from cli.start_file_writer import is_empty
 from file_writer_control import JobHandler, JobState, WorkerCommandChannel
 
 
@@ -99,14 +100,27 @@ def verify_write_job(job_handler):
         )
 
 
-if __name__ == "__main__":
-    cli_args = cli_parser()
+def validate_namespace():
     if cli_args.stop and cli_args.stop_after:
         print(
             "Positional arguments [-s --stop] and [-sa --stop_after] cannot "
             "be used simultaneously."
         )
         sys.exit()
+    argument_list = [
+        cli_args.stop,
+        cli_args.stop_after,
+        cli_args.broker,
+        cli_args.topic,
+    ]
+    for arg in argument_list:
+        if arg:
+            is_empty(arg)
+
+
+if __name__ == "__main__":
+    cli_args = cli_parser()
+    validate_namespace()
 
     _id = cli_args.stop if cli_args.stop else cli_args.stop_after[0]
     handler = create_job_handler(cli_args, _id)
