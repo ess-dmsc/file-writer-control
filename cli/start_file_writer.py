@@ -118,7 +118,7 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
 
     file_name = args.filename
     host = args.broker
-    topic = args.topic
+    topic = args.command_status_topic
     config = args.config
     ACK_TIMEOUT = args.timeout
     command_channel = WorkerCommandChannel(f"{host}/{topic}")
@@ -146,7 +146,8 @@ def inform_status() -> None:
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
-    argument_list = [args.filename, args.config, args.broker, args.topic]
+    argument_list = [args.filename, args.config, args.broker,
+                     args.command_status_topic]
     for arg in argument_list:
         is_empty(arg)
 
