@@ -68,7 +68,6 @@ def test_try_send_stop_now():
     assert message.service_id == service_id
     assert message.job_id == job_id
     assert message.command_id == result.command_id
-    assert message.stop_time == 0
 
 
 def test_get_job_status():
