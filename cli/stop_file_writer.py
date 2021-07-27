@@ -61,7 +61,7 @@ def cli_parser() -> argparse.Namespace:
     return args
 
 
-def create_job_handler(args, job_id):
+def create_job_handler(args: argparse.Namespace, job_id: str) -> JobHandler:
     host = args.broker
     topic = args.topic
     command_channel = WorkerCommandChannel(f"{host}/{topic}")
@@ -71,7 +71,7 @@ def create_job_handler(args, job_id):
     return job_handler
 
 
-def stop_write_job_now(job_handler) -> None:
+def stop_write_job_now(job_handler: JobHandler) -> None:
     while job_handler.get_state() == JobState.WRITING:
         job_handler.stop_now()
         time.sleep(1)
@@ -79,7 +79,7 @@ def stop_write_job_now(job_handler) -> None:
             print("FileWriter successfully stopped.")
 
 
-def stop_write_job(args, job_handler) -> None:
+def stop_write_job(args: argparse.Namespace, job_handler: JobHandler) -> None:
     stop_time = float(args.stop_after[1])
     timeout = int(current_time()) + args.timeout
     stop_time = datetime.now() + timedelta(seconds=stop_time)
@@ -89,7 +89,7 @@ def stop_write_job(args, job_handler) -> None:
             raise ValueError("Timeout.")
 
 
-def verify_write_job(job_handler):
+def verify_write_job(job_handler: JobHandler) -> None:
     if job_handler.get_state() == JobState.WRITING:
         print("The write process is confirmed. Stopping...")
     else:
@@ -100,7 +100,7 @@ def verify_write_job(job_handler):
         )
 
 
-def validate_namespace():
+def validate_namespace() -> None:
     if cli_args.stop and cli_args.stop_after:
         print(
             "Positional arguments [-s --stop] and [-sa --stop_after] cannot "
