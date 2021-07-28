@@ -31,6 +31,14 @@ def cli_parser() -> argparse.Namespace:
         help="Name of the output file, e.g., `<filename>.nxs`.",
     )
     fw_parser.add_argument(
+        "-j",
+        "--job-id",
+        metavar="job_id",
+        type=str,
+        help="The job identifier of the currently running file-writer job. "
+        "The job identifier should be a valid UUID.",
+    )
+    fw_parser.add_argument(
         "-c",
         "--config",
         metavar="json_config",
@@ -117,6 +125,7 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
     global ACK_TIMEOUT
 
     file_name = args.filename
+    job_id = args.job_id
     host = args.broker
     topic = args.topic
     config = args.config
@@ -125,12 +134,17 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
     JOB_HANDLER = JobHandler(worker_finder=command_channel)
     with open(config, "r") as f:
         nexus_structure = f.read()
-    write_job = WriteJob(
-        nexus_structure,
-        file_name,
-        host,
-        datetime.now(),
-    )
+    if job_id:
+        write_job = WriteJob(
+            nexus_structure, file_name, host, datetime.now(), job_id=job_id
+        )
+    else:
+        write_job = WriteJob(
+            nexus_structure,
+            file_name,
+            host,
+            datetime.now(),
+        )
     return write_job
 
 
