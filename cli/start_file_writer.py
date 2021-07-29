@@ -31,6 +31,14 @@ def cli_parser() -> argparse.Namespace:
         help="Name of the output file, e.g., `<filename>.nxs`.",
     )
     fw_parser.add_argument(
+        "-j",
+        "--job-id",
+        metavar="job_id",
+        type=str,
+        help="The job identifier of the currently running file-writer job. "
+        "The job identifier should be a valid UUID.",
+    )
+    fw_parser.add_argument(
         "-c",
         "--config",
         metavar="json_config",
@@ -48,11 +56,11 @@ def cli_parser() -> argparse.Namespace:
     )
     fw_parser.add_argument(
         "-t",
-        "--topic",
+        "--command-status-topic",
         metavar="consume_topic",
         type=str,
         required=True,
-        help="Name of the Kafka topic to be consumed.",
+        help="Name of the Kafka topic to listen to commands and send status to.",
     )
     fw_parser.add_argument(
         "--timeout",
@@ -104,11 +112,11 @@ def stop_write_job(stop: float, start_time: datetime, timeout: float) -> None:
 
 
 def stop_write_job_now() -> None:
-    while JOB_HANDLER.get_state() == JobState.WRITING:
-        JOB_HANDLER.stop_now()
-        time.sleep(1)
-        if JOB_HANDLER.get_state() == JobState.DONE:
-            print("FileWriter successfully stopped.")
+    if JOB_HANDLER.get_state() == JobState.WRITING:
+        JOB_HANDLER.set_stop_time(datetime.now())
+        while not JOB_HANDLER.is_done():
+            time.sleep(1)
+        print("FileWriter successfully stopped.")
     sys.exit()
 
 
@@ -117,20 +125,26 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
     global ACK_TIMEOUT
 
     file_name = args.filename
+    job_id = args.job_id
     host = args.broker
-    topic = args.topic
+    topic = args.command_status_topic
     config = args.config
     ACK_TIMEOUT = args.timeout
     command_channel = WorkerCommandChannel(f"{host}/{topic}")
     JOB_HANDLER = JobHandler(worker_finder=command_channel)
     with open(config, "r") as f:
         nexus_structure = f.read()
-    write_job = WriteJob(
-        nexus_structure,
-        file_name,
-        host,
-        datetime.now(),
-    )
+    if job_id:
+        write_job = WriteJob(
+            nexus_structure, file_name, host, datetime.now(), job_id=job_id
+        )
+    else:
+        write_job = WriteJob(
+            nexus_structure,
+            file_name,
+            host,
+            datetime.now(),
+        )
     return write_job
 
 
@@ -146,7 +160,7 @@ def inform_status() -> None:
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
-    argument_list = [args.filename, args.config, args.broker, args.topic]
+    argument_list = [args.filename, args.config, args.broker, args.command_status_topic]
     for arg in argument_list:
         is_empty(arg)
 
@@ -179,15 +193,15 @@ def is_empty(arg: str) -> None:
 
 def ask_user_action(signum, frame) -> Optional[None]:
     user_action = """
-    
+
     What would you like to do (type 1, 2 or 3 and press Enter)?
-    
+
     1- Stop FileWriter immediately
     2- Stop FileWriter after a given time (seconds)
     3- Exit CLI without terminating FileWriter
-    
+
     Or any other key to Continue.
-    
+
     """
 
     choice = input(user_action)
