@@ -170,7 +170,13 @@ def inform_status() -> None:
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
-    argument_list = [args.filename, args.config, args.broker, args.command_status_topic]
+    argument_list = [
+        args.filename,
+        args.config,
+        args.broker,
+        args.command_status_topic,
+        args.job_pool_topic,
+    ]
     for arg in argument_list:
         is_empty(arg)
 
