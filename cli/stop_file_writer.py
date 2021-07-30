@@ -100,27 +100,27 @@ def verify_write_job(job_handler: JobHandler) -> None:
         )
 
 
-def validate_namespace() -> None:
-    if cli_args.stop and cli_args.stop_after:
+def validate_namespace(args: argparse.Namespace) -> None:
+    if args.stop and args.stop_after:
         print(
             "Positional arguments [-s --stop] and [-sa --stop_after] cannot "
             "be used simultaneously."
         )
         sys.exit()
     argument_list = [
-        cli_args.stop,
-        cli_args.stop_after,
-        cli_args.broker,
-        cli_args.topic,
+        args.stop,
+        args.stop_after,
+        args.broker,
+        args.topic,
     ]
     for arg in argument_list:
         if arg:
             is_empty(arg)
 
 
-if __name__ == "__main__":
+def stop_writer():
     cli_args = cli_parser()
-    validate_namespace()
+    validate_namespace(cli_args)
 
     _id = cli_args.stop if cli_args.stop else cli_args.stop_after[0]
     handler = create_job_handler(cli_args, _id)
@@ -130,3 +130,7 @@ if __name__ == "__main__":
         stop_write_job(cli_args, handler)
     else:
         stop_write_job_now(handler)
+
+
+if __name__ == "__main__":
+    stop_writer()
