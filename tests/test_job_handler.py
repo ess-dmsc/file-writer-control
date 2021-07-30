@@ -102,7 +102,7 @@ def test_abort_write_job_with_id():
     assert (
         under_test.abort_write_job() is worker_finder_mock.try_send_abort.return_value
     )
-    worker_finder_mock.try_.assert_called_once_with(
+    worker_finder_mock.try_send_abort.assert_called_once_with(
         test_job_status.service_id, test_job.job_id
     )
 
