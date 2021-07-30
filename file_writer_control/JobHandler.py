@@ -76,9 +76,9 @@ class JobHandler:
             current_status.service_id, self._job_id, stop_time
         )
 
-    def stop_now(self) -> Union[CommandHandler, None]:
+    def abort_write_job(self) -> Union[CommandHandler, None]:
         """
-        Tell the file-writing to stop writing NOW. There is no guarantee that will actually happen though.
+        Tell the file-writing to abort writing. There is no guarantee that will actually happen though.
         This call is not blocking. Calling this member function will have no effect if done before a write job has
         actually started.
 
@@ -87,7 +87,7 @@ class JobHandler:
         current_status = self.worker_finder.get_job_status(self._job_id)
         if current_status is None:
             return None
-        return self.worker_finder.try_send_stop_now(
+        return self.worker_finder.try_send_abort(
             current_status.service_id, self._job_id
         )
 
