@@ -82,11 +82,12 @@ def create_job_handler(args: argparse.Namespace, job_id: str) -> JobHandler:
 
 
 def stop_write_job_now(job_handler: JobHandler) -> None:
-    while job_handler.get_state() == JobState.WRITING:
-        job_handler.stop_now()
-        time.sleep(1)
-        if job_handler.get_state() == JobState.DONE:
-            print("FileWriter successfully stopped.")
+    if job_handler.get_state() == JobState.WRITING:
+        job_handler.set_stop_time(datetime.now())
+        while not job_handler.is_done():
+            time.sleep(1)
+        print("FileWriter successfully stopped.")
+    sys.exit()
 
 
 def stop_write_job(args: argparse.Namespace, job_handler: JobHandler) -> None:
