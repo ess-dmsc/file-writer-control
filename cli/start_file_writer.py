@@ -243,10 +243,14 @@ def set_time_and_stop() -> None:
         print("Input should be a float.")
 
 
-if __name__ == "__main__":
+def start_writer():
     # Catch ctrl-c
     signal.signal(signal.SIGINT, ask_user_action)
     # Main
     cli_args = cli_parser()
     validate_namespace(cli_args)
     file_writer(cli_args)
+
+
+if __name__ == "__main__":
+    start_writer()
