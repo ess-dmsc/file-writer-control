@@ -99,7 +99,9 @@ def test_abort_write_job_with_id():
     worker_finder_mock.get_job_status.return_value = test_job_status
     under_test = JobHandler(worker_finder_mock)
     under_test.start_job(test_job)
-    assert under_test.abort_write_job() is worker_finder_mock.try_send_abort.return_value
+    assert (
+        under_test.abort_write_job() is worker_finder_mock.try_send_abort.return_value
+    )
     worker_finder_mock.try_.assert_called_once_with(
         test_job_status.service_id, test_job.job_id
     )
