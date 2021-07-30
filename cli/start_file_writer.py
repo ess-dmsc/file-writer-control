@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from time import time as current_time
 from typing import Optional, Tuple
 
-from file_writer_control import JobHandler, JobState, WorkerCommandChannel, WriteJob
+from file_writer_control import JobHandler, JobState, WorkerJobPool, WriteJob
 
 JOB_HANDLER: JobHandler
 ACK_TIMEOUT: float
@@ -60,7 +60,16 @@ def cli_parser() -> argparse.Namespace:
         metavar="consume_topic",
         type=str,
         required=True,
-        help="Name of the Kafka topic to listen to commands and send status to.",
+        help="Name of the Kafka topic to listen to" " commands and send status to.",
+    )
+    fw_parser.add_argument(
+        "-p",
+        "--job-pool-topic",
+        metavar="job_pool_topic",
+        type=str,
+        required=True,
+        help="The Kafka topic that the available file-writers"
+        " are listening to for write jobs.",
     )
     fw_parser.add_argument(
         "--timeout",
@@ -127,10 +136,11 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
     file_name = args.filename
     job_id = args.job_id
     host = args.broker
-    topic = args.command_status_topic
+    command_topic = args.command_status_topic
+    pool_topic = args.job_pool_topic
     config = args.config
     ACK_TIMEOUT = args.timeout
-    command_channel = WorkerCommandChannel(f"{host}/{topic}")
+    command_channel = WorkerJobPool(f"{host}/{pool_topic}", f"{host}/{command_topic}")
     JOB_HANDLER = JobHandler(worker_finder=command_channel)
     with open(config, "r") as f:
         nexus_structure = f.read()
@@ -160,7 +170,13 @@ def inform_status() -> None:
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
-    argument_list = [args.filename, args.config, args.broker, args.command_status_topic]
+    argument_list = [
+        args.filename,
+        args.config,
+        args.broker,
+        args.command_status_topic,
+        args.job_pool_topic,
+    ]
     for arg in argument_list:
         is_empty(arg)
 
