@@ -76,13 +76,7 @@ class WorkerFinderBase:
         :param job_id: The job identifier of the currently running file-writer job.
         :return: A CommandHandler instance for (more) easily checking the outcome of the "stop now" command.
         """
-        command_id = str(uuid.uuid1())
-        message = serialise_stop(
-            job_id=job_id, service_id=service_id, command_id=command_id, stop_time=0
-        )
-        self.command_channel.add_command_id(job_id=job_id, command_id=command_id)
-        self.send_command(message)
-        return CommandHandler(self.command_channel, command_id)
+        return self.try_send_stop_time(service_id, job_id, datetime.now())
 
     def list_known_workers(self) -> List[WorkerStatus]:
         """
