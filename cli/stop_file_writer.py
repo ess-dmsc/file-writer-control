@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from time import time as current_time
 
 from cli.start_file_writer import is_empty
-from file_writer_control import JobHandler, JobState, WorkerCommandChannel
+from file_writer_control import JobHandler, JobState, WorkerJobPool
 
 
 def cli_parser() -> argparse.Namespace:
@@ -49,6 +49,15 @@ def cli_parser() -> argparse.Namespace:
         help="Name of the Kafka topic to listen to commands and send status to.",
     )
     fw_parser.add_argument(
+        "-p",
+        "--job-pool-topic",
+        metavar="job_pool_topic",
+        type=str,
+        required=True,
+        help="The Kafka topic that the available file-writers"
+        " are listening to for write jobs.",
+    )
+    fw_parser.add_argument(
         "--timeout",
         metavar="ack_timeout",
         type=float,
@@ -63,8 +72,9 @@ def cli_parser() -> argparse.Namespace:
 
 def create_job_handler(args: argparse.Namespace, job_id: str) -> JobHandler:
     host = args.broker
-    topic = args.topic
-    command_channel = WorkerCommandChannel(f"{host}/{topic}")
+    command_topic = args.command_status_topic
+    pool_topic = args.job_pool_topic
+    command_channel = WorkerJobPool(f"{host}/{pool_topic}", f"{host}/{command_topic}")
     job_handler = JobHandler(worker_finder=command_channel, job_id=job_id)
     # Required for formation of the handler.
     time.sleep(3)
@@ -109,11 +119,11 @@ def validate_namespace(args: argparse.Namespace) -> None:
         sys.exit()
     argument_list = [
         args.stop,
-        args.stop_after,
         args.broker,
-        args.topic,
+        args.command_status_topic,
+        args.job_pool_topic,
     ]
-    for arg in argument_list:
+    for arg in argument_list + args.stop_after:
         if arg:
             is_empty(arg)
 
