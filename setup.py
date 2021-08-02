@@ -1,6 +1,7 @@
 import os
 
 from setuptools import find_packages, setup
+
 from file_writer_control._version import version
 
 DESCRIPTION = (
@@ -28,5 +29,5 @@ setup(
     license="BSD 2-Clause License",
     packages=find_packages(exclude=["tests", "examples"]),
     python_requires=">=3.6.0",
-    install_requires=["kafka-python>=2.0", "ess-streaming-data-types>=0.10.0"],
+    install_requires=["kafka-python>=2.0", "ess-streaming-data-types>=0.14.0"],
 )
