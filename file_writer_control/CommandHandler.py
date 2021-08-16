@@ -2,6 +2,7 @@ from file_writer_control.CommandChannel import CommandChannel
 from file_writer_control.CommandStatus import CommandState
 from datetime import timedelta
 
+
 class CommandHandler:
     """
     A stand in for (more easily) checking the state of a command sent to a file-writer.
