@@ -50,14 +50,14 @@ def test_try_send_stop_time():
     assert message.stop_time == int(stop_time.timestamp() * 1000)
 
 
-def test_try_send_stop_now():
+def test_try_abort_job_now():
     service_id = "some service_id"
     job_id = "some job id"
     cmd_channel_mock = Mock()
     producer_mock = Mock()
     test_topic = "some topic"
     under_test = WorkerFinderBase(test_topic, cmd_channel_mock, producer_mock)
-    result = under_test.try_send_stop_now(service_id, job_id)
+    result = under_test.try_send_abort(service_id, job_id)
     cmd_channel_mock.add_command_id.assert_called_once_with(
         job_id=job_id, command_id=result.command_id
     )
@@ -68,7 +68,6 @@ def test_try_send_stop_now():
     assert message.service_id == service_id
     assert message.job_id == job_id
     assert message.command_id == result.command_id
-    assert message.stop_time == 0
 
 
 def test_get_job_status():

@@ -28,6 +28,12 @@ setup(
     url="https://github.com/ess-dmsc/file_writer_control",
     license="BSD 2-Clause License",
     packages=find_packages(exclude=["tests", "examples"]),
+    entry_points={
+        "console_scripts": [
+            "start_file_writer = cli.start_file_writer:start_writer",
+            "stop_file_writer = cli.stop_file_writer:stop_writer",
+        ],
+    },
     python_requires=">=3.6.0",
     install_requires=["kafka-python>=2.0", "ess-streaming-data-types>=0.14.0"],
 )
