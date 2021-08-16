@@ -4,6 +4,7 @@
 
 * Fixed command timeout configuration.
 * Fixed serious datetime bug.
+* Reverted removal of `stop_now()` it directly calls the `abort_write_job()` function.
 
 ## Version 1.1.6
 
