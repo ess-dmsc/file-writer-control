@@ -1,6 +1,10 @@
 import pytest
 
-from file_writer_control.CommandStatus import CommandState, CommandStatus, COMMAND_STATUS_TIMEOUT
+from file_writer_control.CommandStatus import (
+    CommandState,
+    CommandStatus,
+    COMMAND_STATUS_TIMEOUT,
+)
 from datetime import timedelta
 
 

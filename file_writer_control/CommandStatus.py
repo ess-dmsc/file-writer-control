@@ -23,7 +23,12 @@ class CommandStatus(object):
     The status of a command.
     """
 
-    def __init__(self, job_id: str, command_id: str, command_timeout: timedelta = COMMAND_STATUS_TIMEOUT):
+    def __init__(
+        self,
+        job_id: str,
+        command_id: str,
+        command_timeout: timedelta = COMMAND_STATUS_TIMEOUT,
+    ):
         self._command_timeout = command_timeout
         self._job_id = job_id
         self._command_id = command_id

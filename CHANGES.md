@@ -1,5 +1,10 @@
 # Version changes
 
+## Version 1.1.6
+
+* Added the ability to configure the command-timeout.
+* New commands now get the initial state: "waiting for response" when they are sent.
+
 ## Version 1.1.4
 
 * Simplify importing of classes.
