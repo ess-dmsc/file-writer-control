@@ -1,6 +1,6 @@
 from file_writer_control.CommandChannel import CommandChannel
 from file_writer_control.CommandStatus import CommandState
-
+from datetime import timedelta
 
 class CommandHandler:
     """
@@ -48,3 +48,9 @@ class CommandHandler:
         if command is None:
             return ""
         return command.message
+
+    def set_timeout(self, new_timeout: timedelta):
+        self.command_channel.get_command(self.command_id).timeout = new_timeout
+
+    def get_timeout(self):
+        return self.command_channel.get_command(self.command_id).timeout
