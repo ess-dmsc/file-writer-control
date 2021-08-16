@@ -1,5 +1,10 @@
 # Version changes
 
+## Version 1.1.7
+
+* Fixed command timeout configuration.
+* Fixed serious datetime bug.
+
 ## Version 1.1.6
 
 * Added the ability to configure the command-timeout.
