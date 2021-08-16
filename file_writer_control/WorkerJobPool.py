@@ -42,6 +42,7 @@ class WorkerJobPool(WorkerFinder):
         """
         See base class for documentation.
         """
+        self.command_channel.add_job_id(job.job_id)
         self.command_channel.add_command_id(job.job_id, job.job_id)
         self.command_channel.get_command(
             job.job_id

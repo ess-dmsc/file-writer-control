@@ -7,7 +7,7 @@ from typing import Dict, List, Union
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
-from file_writer_control.CommandStatus import CommandStatus
+from file_writer_control.CommandStatus import CommandStatus, CommandState
 from file_writer_control.InThreadStatusTracker import (
     DEAD_ENTITY_TIME_LIMIT,
     InThreadStatusTracker,
@@ -104,6 +104,7 @@ class CommandChannel(object):
         """
         if command_id not in self.map_of_commands:
             self.map_of_commands[command_id] = CommandStatus(job_id, command_id)
+            self.map_of_commands[command_id].state = CommandState.WAITING_RESPONSE
 
     def stop_thread(self):
         """

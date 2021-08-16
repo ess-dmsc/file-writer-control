@@ -23,7 +23,8 @@ class CommandStatus(object):
     The status of a command.
     """
 
-    def __init__(self, job_id: str, command_id: str):
+    def __init__(self, job_id: str, command_id: str, command_timeout: timedelta = COMMAND_STATUS_TIMEOUT):
+        self._command_timeout = command_timeout
         self._job_id = job_id
         self._command_id = command_id
         self._last_update = datetime.now()
@@ -66,7 +67,7 @@ class CommandStatus(object):
             self.state != CommandState.SUCCESS
             and self.state != CommandState.ERROR
             and self.state != CommandState.TIMEOUT_RESPONSE
-            and current_time - self.last_update > COMMAND_STATUS_TIMEOUT
+            and current_time - self.last_update > self._command_timeout
         ):
             self._state = CommandState.TIMEOUT_RESPONSE
             self._last_update = current_time
@@ -132,3 +133,14 @@ class CommandStatus(object):
         The local time stamp of the last update of the status of the command.
         """
         return self._last_update
+
+    @property
+    def timeout(self) -> timedelta:
+        """
+        Timeout for waiting for response to command.
+        """
+        return self._command_timeout
+
+    @timeout.setter
+    def timeout(self, new_timeout: timedelta):
+        self._command_timeout = new_timeout
