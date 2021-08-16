@@ -16,6 +16,7 @@ class WriteJob:
         broker: str,
         start_time: datetime,
         stop_time: datetime = None,
+        job_id="",
         instrument_name: str = "",
         run_name: str = "",
         metadata: str = "",
@@ -23,7 +24,14 @@ class WriteJob:
     ):
         self.structure = nexus_structure
         self.file = file_name
-        self.job_id = str(uuid.uuid1())
+        if job_id:
+            try:
+                uuid.UUID(job_id)
+                self.job_id = job_id
+            except ValueError as e:
+                raise RuntimeError("Job ID should be a valid UUID (v1).") from e
+        else:
+            self.job_id = str(uuid.uuid1())
         self.start = start_time
         if stop_time is None:
             self.stop = self.start + timedelta(days=365.25 * 10)
