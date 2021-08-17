@@ -2,10 +2,6 @@
 import ecdcpipeline.ContainerBuildNode
 import ecdcpipeline.PipelineBuilder
 
-project = "file-writer-control"
-
-python = "python3.6"
-
 container_build_nodes = [
   'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8')
 ]
@@ -38,26 +34,22 @@ builders = pipeline_builder.createBuilders { container ->
 
   pipeline_builder.stage("${container.key}: Dependencies") {
     container.sh """
-      /opt/miniconda/bin/conda init bash
-      export PATH=/opt/miniconda/bin:$PATH
       python --version
-      python -m pip install --user -r ${project}/requirements-dev.txt
-      python -m pip install --user -r ${project}/requirements-jenkins.txt
+      python -m pip install --user -r ${pipeline_builder.project}/requirements-dev.txt
+      python -m pip install --user -r ${pipeline_builder.project}/requirements-jenkins.txt
     """
   } // stage
 
   pipeline_builder.stage("${container.key}: Formatting (black) ") {
     container.sh """
-      export PATH=/opt/miniconda/bin:$PATH
-      cd ${project}
+      cd ${pipeline_builder.project}
       python -m black --check .
     """
   } // stage
 
   pipeline_builder.stage("${container.key}: Analysis (flake8) ") {
     container.sh """
-      export PATH=/opt/miniconda/bin:$PATH
-      cd ${project}
+      cd ${pipeline_builder.project}
       python -m flake8
     """
   } // stage
@@ -65,18 +57,17 @@ builders = pipeline_builder.createBuilders { container ->
   pipeline_builder.stage("${container.key}: Test") {
     def test_output = "TestResults.xml"
     container.sh """
-      export PATH=/opt/miniconda/bin:$PATH
       python --version
-      cd ${project}
+      cd ${pipeline_builder.project}
       python -m pytest --junitxml=${test_output}
     """
-    container.copyFrom("${project}/${test_output}", ".")
+    container.copyFrom("${pipeline_builder.project}/${test_output}", ".")
     xunit thresholds: [failed(unstableThreshold: '0')], tools: [JUnit(deleteOutputFiles: true, pattern: '*.xml', skipNoTestFiles: false, stopProcessingIfError: true)]
   } // stage
 }  // createBuilders
 
 node {
-  dir("${project}") {
+  dir("${pipeline_builder.project}") {
     scm_vars = checkout scm
   }
 
