@@ -1,5 +1,21 @@
 # Version changes
 
+## Version 1.1.7
+
+* Fixed command timeout configuration.
+* Fixed serious datetime bug.
+* Reverted removal of `stop_now()`, it now directly calls the `abort_write_job()` function.
+* Reverted removal of `try_send_stop_now()`, it now directly calls the `try_send_abort()` function.
+
+## Version 1.1.6
+
+* Added the ability to configure the command-timeout.
+* New commands now get the initial state: "waiting for response" when they are sent.
+
+## Version 1.1.5
+
+* Implemented command line interface script to library.
+
 ## Version 1.1.4
 
 * Simplify importing of classes.

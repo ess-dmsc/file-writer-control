@@ -76,6 +76,12 @@ class JobHandler:
             current_status.service_id, self._job_id, stop_time
         )
 
+    def stop_now(self) -> Union[CommandHandler, None]:
+        """
+        See the documentation for abort_write_job().
+        """
+        return self.abort_write_job()
+
     def abort_write_job(self) -> Union[CommandHandler, None]:
         """
         Tell the file-writing to abort writing. There is no guarantee that will actually happen though.

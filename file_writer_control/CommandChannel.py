@@ -2,12 +2,12 @@ import atexit
 import threading
 from datetime import datetime
 from queue import Queue
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Optional
 
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
-from file_writer_control.CommandStatus import CommandStatus
+from file_writer_control.CommandStatus import CommandStatus, CommandState
 from file_writer_control.InThreadStatusTracker import (
     DEAD_ENTITY_TIME_LIMIT,
     InThreadStatusTracker,
@@ -104,6 +104,7 @@ class CommandChannel(object):
         """
         if command_id not in self.map_of_commands:
             self.map_of_commands[command_id] = CommandStatus(job_id, command_id)
+            self.map_of_commands[command_id].state = CommandState.WAITING_RESPONSE
 
     def stop_thread(self):
         """
@@ -119,12 +120,14 @@ class CommandChannel(object):
     def __del__(self):
         self.stop_thread()
 
-    def update_workers(self, current_time: datetime = datetime.now()):
+    def update_workers(self, current_time: Optional[datetime] = None):
         """
         Update the list of known workers, jobs and commands. This is a non-blocking call but it might take some time
         to execute if the queue of updates is long. This member function is called by many of the other member functions
         in this class.
         """
+        if current_time is None:
+            current_time = datetime.now()
 
         def handle_worker_status(status_update):
             if status_update.service_id not in self.map_of_workers:

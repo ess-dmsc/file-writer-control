@@ -68,6 +68,12 @@ class WorkerFinderBase:
         self.send_command(message)
         return CommandHandler(self.command_channel, command_id)
 
+    def try_send_stop_now(self, service_id: str, job_id: str) -> CommandHandler:
+        """
+        See documentation for `try_send_abort()`.
+        """
+        return self.try_send_abort(service_id, job_id)
+
     def try_send_abort(self, service_id: str, job_id: str) -> CommandHandler:
         """
         Sends a "abort" message to a file-writer running a job as identified by the parameters of this function.

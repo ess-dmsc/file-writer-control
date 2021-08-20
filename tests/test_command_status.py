@@ -1,6 +1,11 @@
 import pytest
 
-from file_writer_control.CommandStatus import CommandState, CommandStatus
+from file_writer_control.CommandStatus import (
+    CommandState,
+    CommandStatus,
+    COMMAND_STATUS_TIMEOUT,
+)
+from datetime import timedelta
 
 
 def test_init():
@@ -47,6 +52,20 @@ def test_update_success():
     under_test1 = CommandStatus("job_id1", "command_id1")
     under_test2 = CommandStatus("job_id1", "command_id1")
     under_test2.update_status(under_test1)  # No exception
+
+
+def test_timeout1():
+    under_test = CommandStatus("job_id1", "command_id1")
+    assert under_test.timeout == COMMAND_STATUS_TIMEOUT
+
+
+def test_timeout2():
+    test_time = timedelta(minutes=2)
+    under_test = CommandStatus("job_id1", "command_id1", test_time)
+    assert under_test.timeout == test_time
+    test_time2 = timedelta(seconds=30)
+    under_test.timeout = test_time2
+    assert under_test.timeout == test_time2
 
 
 def test_update_message():
