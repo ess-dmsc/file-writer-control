@@ -6,6 +6,11 @@ the commands and control.
 
 ## Getting started
 
+You can install the library with pip by running
+```bash
+pip install file-writer-control
+```
+
 The _examples_ directory contains different examples of how to use the library - we recommend you start there.
 
 ## Installing dependencies
