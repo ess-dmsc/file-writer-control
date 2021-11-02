@@ -12,11 +12,10 @@
           "name": "axis_position",
           "children": [
             {
-              "type": "stream",
-              "stream": {
+              "module": "f142",
+              "config": {
                 "topic": "Ymir_motion",
-                "source": "SES-SCAN:MC-MCU-001:m2.RBV",
-                "writer_module": "f142"
+                "source": "SES-SCAN:MC-MCU-001:m2.RBV"
               }
             }
           ]
