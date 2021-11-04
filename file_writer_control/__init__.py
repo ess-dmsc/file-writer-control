@@ -8,7 +8,6 @@ from .JobStatus import JobState
 
 __all__ = [
     "JobHandler",
-    "WorkerCommandChannel",
     "WorkerJobPool",
     "WriteJob",
     "CommandState",
