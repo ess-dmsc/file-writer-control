@@ -54,6 +54,11 @@ def test_process_status_once():
     print(list(keys)[0])
     assert under_test.known_jobs[list(keys)[0]].file_name == "some_file_name.nxs"
     assert under_test.known_jobs[list(keys)[0]].state == JobState.WRITING
+    assert under_test.known_jobs[list(keys)[0]].metadata == {
+        "state": "writing",
+        "job_id": "some_job_id",
+        "file_being_written": "some_file_name.nxs",
+    }
 
 
 def test_process_status_twice_two_updates_1():
@@ -263,7 +268,9 @@ def test_process_msg_has_stopped():
 
 
 def test_process_msg_status():
-    status_msg = serialise_status("sw", "v1", "service_id", "host", 12, 142, "status")
+    status_msg = serialise_status(
+        "sw", "v1", "service_id", "host", 12, 142, status_json="{}"
+    )
     status_queue = Queue()
     under_test = InThreadStatusTracker(status_queue)
     under_test.process_status = Mock()
@@ -277,7 +284,12 @@ def test_process_stopped_ok():
     job_id = "some_job_id"
     service_id = "some_service_id"
     stopped = WritingFinished(
-        service_id, job_id, False, "FileName", "meta data", "some message"
+        service_id,
+        job_id,
+        False,
+        "FileName",
+        """{"key": "meta data"}""",
+        "some message",
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -289,6 +301,7 @@ def test_process_stopped_ok():
     assert status_queue.empty()
     assert worker_status.state == WorkerState.IDLE
     assert job_status.state == JobState.DONE
+    assert job_status.metadata == {"key": "meta data"}
 
 
 def test_process_stopped_error():
@@ -297,7 +310,7 @@ def test_process_stopped_error():
     job_id = "some_job_id"
     service_id = "some_service_id"
     stopped = WritingFinished(
-        service_id, job_id, True, "FileName", "meta data", "some message"
+        service_id, job_id, True, "FileName", """{"key": "meta data"}""", "some message"
     )
     assert status_queue.empty()
     now = datetime.now()
@@ -309,6 +322,7 @@ def test_process_stopped_error():
     assert status_queue.empty()
     assert worker_status.state == WorkerState.IDLE
     assert job_status.state == JobState.ERROR
+    assert job_status.metadata is None
 
 
 def test_process_start():

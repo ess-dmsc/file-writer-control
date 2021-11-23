@@ -207,7 +207,7 @@ def is_empty(arg: str) -> None:
         raise ValueError("A positional argument cannot be an empty string.")
 
 
-def ask_user_action(signum, frame) -> Optional[None]:
+def ask_user_action(signum, frame) -> None:
     user_action = """
 
     What would you like to do (type 1, 2 or 3 and press Enter)?

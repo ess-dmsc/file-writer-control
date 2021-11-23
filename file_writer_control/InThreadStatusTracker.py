@@ -174,12 +174,16 @@ class InThreadStatusTracker:
         current_state = extract_worker_state_from_status(status_update)
         self.known_workers[status_update.service_id].state = current_state
         if current_state == WorkerState.WRITING:
-            json_data = json.loads(status_update.status_json)
-            job_id = json_data["job_id"]
+            try:
+                json_data = json.loads(status_update.status_json)
+                job_id = json_data["job_id"]
+            except (KeyError, json.JSONDecodeError):
+                raise RuntimeError("Unable to extract JSON data from status message.")
             file_name = json_data["file_being_written"]
             self.check_for_job_presence(job_id)
             self.known_jobs[job_id].state = JobState.WRITING
             self.known_jobs[job_id].file_name = file_name
+            self.known_jobs[job_id].metadata = json_data
             # For some jobs, we will only know the service-id when a worker starts working on a job.
             # Thus we need the following statement to update the (known) service-id of a job.
             try:
@@ -216,5 +220,6 @@ class InThreadStatusTracker:
             current_job.state = JobState.ERROR
         else:
             current_job.state = JobState.DONE
+            current_job.metadata = json.loads(stopped.metadata)
         current_job.message = stopped.message
         self.known_workers[stopped.service_id].state = WorkerState.IDLE
