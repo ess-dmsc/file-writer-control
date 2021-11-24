@@ -5,7 +5,7 @@ import sys
 import time
 from datetime import datetime, timedelta
 from time import time as current_time
-from typing import Optional, Tuple
+from typing import Tuple
 
 from file_writer_control import JobHandler, JobState, WorkerJobPool, WriteJob
 
