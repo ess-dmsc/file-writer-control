@@ -1,5 +1,8 @@
 # Version changes
 
+## Version 1.2.0
+* Added code for making mata data from status messages and "wrdn" messages available.
+
 ## Version 1.1.7
 
 * Fixed command timeout configuration.

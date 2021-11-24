@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from enum import Enum, auto
+from typing import Optional, Dict
 
 JOB_STATUS_TIMEOUT = timedelta(seconds=5)
 
@@ -29,6 +30,7 @@ class JobStatus:
         self._file_name = ""
         self._last_update = datetime.now()
         self._state = JobState.WAITING
+        self._metadata: Optional[Dict] = None
         self._message = ""
 
     def update_status(self, new_status: "JobStatus") -> None:
@@ -47,6 +49,7 @@ class JobStatus:
         self._service_id = new_status.service_id
         self._file_name = new_status.file_name
         self._last_update = new_status.last_update
+        self._metadata = new_status.metadata
 
     def check_if_outdated(self, current_time: datetime):
         """
@@ -127,6 +130,14 @@ class JobStatus:
         Status/state message of the job as received from the file-writer.
         """
         return self._message
+
+    @property
+    def metadata(self) -> Optional[Dict]:
+        return self._metadata
+
+    @metadata.setter
+    def metadata(self, metadata: Dict) -> None:
+        self._metadata = metadata
 
     @message.setter
     def message(self, new_message: str) -> None:
