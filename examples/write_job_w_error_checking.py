@@ -9,10 +9,10 @@ from file_writer_control import WriteJob
 
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"
-    command_channel = WorkerJobPool(
+    worker_job_pool = WorkerJobPool(
         "{}/job_topic".format(kafka_host), "{}/command_topic".format(kafka_host)
     )
-    job_handler = JobHandler(worker_finder=command_channel)
+    job_handler = JobHandler(worker_finder=worker_job_pool)
     start_time = datetime.now()
     with open("file_writer_config.json", "r") as f:
         nexus_structure = f.read()
