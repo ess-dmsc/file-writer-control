@@ -34,7 +34,8 @@ def print_current_state(channel: WorkerJobPool):
 
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"
-    worker_job_pool = WorkerJobPool(f'{kafka_host}/job_pool_topic',
-                                    f'{kafka_host}/command_topic')
+    worker_job_pool = WorkerJobPool(
+        f"{kafka_host}/job_pool_topic", f"{kafka_host}/command_topic"
+    )
     time.sleep(10)
     print_current_state(worker_job_pool)
