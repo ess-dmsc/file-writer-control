@@ -15,7 +15,7 @@ The library allows for communication with the file-writer using the various help
 
 ## Writing a file using the file writer control
 
-We start a job by having a file-writer instance that is currently idle pick up the job. This is done by sending the file-writing job to a "job pool" topic. This can be done with the use of the `WorkerJobPool` class as follows (also in [*write_job_2.py*](write_job.py)):
+We start a job by having a file-writer instance that is currently idle pick up the job. This is done by sending the file-writing job to a "job pool" topic. This can be done with the use of the `WorkerJobPool` class as follows (also in [*write_job.py*](write_job.py)):
 
 ```python
 from file_writer_control.WorkerJobPool import WorkerJobPool
