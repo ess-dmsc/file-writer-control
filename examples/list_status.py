@@ -1,9 +1,9 @@
 import time
 
-from file_writer_control import WorkerCommandChannel
+from file_writer_control import WorkerJobPool
 
 
-def print_current_state(channel: WorkerCommandChannel):
+def print_current_state(channel: WorkerJobPool):
     print("Known workers")
     w_format = "{:45s}{:30s}"
     print(w_format.format("Service id", "Current state"))
@@ -34,6 +34,8 @@ def print_current_state(channel: WorkerCommandChannel):
 
 if __name__ == "__main__":
     kafka_host = "dmsc-kafka01:9092"
-    command_channel = WorkerCommandChannel("{}/command_topic".format(kafka_host))
+    worker_job_pool = WorkerJobPool(
+        f"{kafka_host}/job_pool_topic", f"{kafka_host}/command_topic"
+    )
     time.sleep(10)
-    print_current_state(command_channel)
+    print_current_state(worker_job_pool)
