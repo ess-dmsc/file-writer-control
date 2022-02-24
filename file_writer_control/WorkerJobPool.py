@@ -13,7 +13,12 @@ class WorkerJobPool(WorkerFinder):
     A child of WorkerFinder intended for use with "worker pool" style of starting a file-writing job.
     """
 
-    def __init__(self, job_topic_url: str, command_topic_url: str, max_message_size: int = 1048576*200):
+    def __init__(
+        self,
+        job_topic_url: str,
+        command_topic_url: str,
+        max_message_size: int = 1048576 * 200,
+    ):
         """
         :param job_topic_url: The Kafka topic that the available file-writers are listening to for write jobs.
         :param command_topic_url: The Kafka topic that a file-writer uses to send status updates to and receive direct
@@ -26,7 +31,7 @@ class WorkerJobPool(WorkerFinder):
         try:
             self._pool_producer = KafkaProducer(
                 bootstrap_servers=[self._job_pool.host_port],
-                max_request_size=max_message_size
+                max_request_size=max_message_size,
             )
         except NoBrokersAvailable as e:
             raise NoBrokersAvailable(
@@ -40,9 +45,11 @@ class WorkerJobPool(WorkerFinder):
         :param message: The binary data of the message.
         """
         if len(message) >= self._max_message_size:
-            raise RuntimeError(f"Unable to send Kafka message as message size is too large ({len(message)} vs"
-                               f"{self._max_message_size} bytes). Increase max message size with the 'max_message_size'"
-                               f"constructor argument.")
+            raise RuntimeError(
+                f"Unable to send Kafka message as message size is too large ({len(message)} vs"
+                f"{self._max_message_size} bytes). Increase max message size with the 'max_message_size'"
+                f"constructor argument."
+            )
         self._pool_producer.send(self._job_pool.topic, message)
 
     def try_start_job(self, job: WriteJob) -> CommandHandler:
