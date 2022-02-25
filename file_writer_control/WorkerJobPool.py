@@ -22,8 +22,8 @@ class WorkerJobPool(WorkerFinder):
         """
         :param job_topic_url: The Kafka topic that the available file-writers are listening to for write jobs.
         :param command_topic_url: The Kafka topic that a file-writer uses to send status updates to and receive direct
-        :param max_message_size: The maximum message (actually "request") size.
         commands from.
+        :param max_message_size: The maximum message (actually "request") size.
         """
         super().__init__(command_topic_url)
         self._job_pool = KafkaTopicUrl(job_topic_url)
