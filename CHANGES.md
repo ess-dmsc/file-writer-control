@@ -1,5 +1,9 @@
 # Version changes
 
+## Version 1.2.1
+* It is now possible to set the maximum message size for the WorkerJobPool. An exception will be thrown if this size is
+    exceeded when starting a new job.
+
 ## Version 1.2.0
 * Added code for making mata data from status messages and "wrdn" messages available.
 
