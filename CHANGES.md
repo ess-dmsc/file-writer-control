@@ -1,5 +1,9 @@
 # Version changes
 
+## Version 1.2.2
+* Turns out that on top of setting the max message size, the maximum buffer size also has to be set. This is now done in
+    this version.
+
 ## Version 1.2.1
 * It is now possible to set the maximum message size for the WorkerJobPool. An exception will be thrown if this size is
     exceeded when starting a new job.
