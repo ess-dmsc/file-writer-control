@@ -32,7 +32,7 @@ class WorkerJobPool(WorkerFinder):
             self._pool_producer = KafkaProducer(
                 bootstrap_servers=[self._job_pool.host_port],
                 max_request_size=max_message_size,
-                buffer_memory=max_message_size
+                buffer_memory=max_message_size,
             )
         except NoBrokersAvailable as e:
             raise NoBrokersAvailable(
