@@ -1,5 +1,8 @@
 # Version changes
 
+## Version 1.2.3
+* Increased the maximum size of received messages and the command status timeout.
+
 ## Version 1.2.2
 * Turns out that on top of setting the max message size, the maximum buffer size also has to be set. This is now done in
     this version.

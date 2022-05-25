@@ -33,6 +33,7 @@ def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queu
                 topic,
                 bootstrap_servers=host_port,
                 fetch_max_bytes=52428800 * 6,
+                max_partition_fetch_bytes=52428800 * 10,
                 consumer_timeout_ms=100,
             )  # Roughly 300MB
             break

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from enum import Enum, auto
 from typing import Optional
 
-COMMAND_STATUS_TIMEOUT = timedelta(seconds=30)
+COMMAND_STATUS_TIMEOUT = timedelta(seconds=60)
 
 
 class CommandState(Enum):
