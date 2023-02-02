@@ -70,10 +70,10 @@ class JobHandler:
         :return: A CommandHandler instance that can be used to monitor the outcome of the attempt to set a new stop time.
         """
         current_status = self.worker_finder.get_job_status(self._job_id)
-        if current_status is None:
-            return None
         return self.worker_finder.try_send_stop_time(
-            current_status.service_id, self._job_id, stop_time
+            current_status.service_id if current_status else None,
+            self._job_id,
+            stop_time,
         )
 
     def stop_now(self) -> Union[CommandHandler, None]:
@@ -91,10 +91,8 @@ class JobHandler:
         :return: A CommandHandler instance that can be used to monitor the outcome of the attempt to set a new stop time.
         """
         current_status = self.worker_finder.get_job_status(self._job_id)
-        if current_status is None:
-            return None
         return self.worker_finder.try_send_abort(
-            current_status.service_id, self._job_id
+            current_status.service_id if current_status else None, self._job_id
         )
 
     @property

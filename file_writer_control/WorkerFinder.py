@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List
+from typing import List, Optional
 
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
@@ -47,12 +47,12 @@ class WorkerFinderBase:
         raise NotImplementedError("Not implemented in base class.")
 
     def try_send_stop_time(
-        self, service_id: str, job_id: str, stop_time: datetime
+        self, service_id: Optional[str], job_id: str, stop_time: datetime
     ) -> CommandHandler:
         """
         Sends a "set stop time" message to a file-writer running a job as identified by the parameters.
         This function is not blocking. No guarantees are given that this command will be followed.
-        :param service_id: The service identifier of the file-writer to receive the command.
+        :param service_id: The (optional) service identifier of the file-writer to receive the command.
         :param job_id: The job identifier of the currently running file-writer job.
         :param stop_time: The new stop time.
         :return: A CommandHandler instance for (more) easily checking the outcome of setting a new stop time.
@@ -68,17 +68,19 @@ class WorkerFinderBase:
         self.send_command(message)
         return CommandHandler(self.command_channel, command_id)
 
-    def try_send_stop_now(self, service_id: str, job_id: str) -> CommandHandler:
+    def try_send_stop_now(
+        self, service_id: Optional[str], job_id: str
+    ) -> CommandHandler:
         """
         See documentation for `try_send_abort()`.
         """
         return self.try_send_abort(service_id, job_id)
 
-    def try_send_abort(self, service_id: str, job_id: str) -> CommandHandler:
+    def try_send_abort(self, service_id: Optional[str], job_id: str) -> CommandHandler:
         """
         Sends a "abort" message to a file-writer running a job as identified by the parameters of this function.
         This function is not blocking. No guarantees are given that this command will be followed.
-        :param service_id: The service identifier of the file-writer to receive the command.
+        :param service_id: The (optional) service identifier of the file-writer to receive the command.
         :param job_id: The job identifier of the currently running file-writer job.
         :return: A CommandHandler instance for (more) easily checking the outcome of the "abort" command.
         """

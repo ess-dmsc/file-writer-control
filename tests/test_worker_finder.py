@@ -28,8 +28,14 @@ def test_try_start_job():
         under_test.try_start_job(WriteJob("", "", "", datetime.now()))
 
 
-def test_try_send_stop_time():
-    service_id = "some service_id"
+@pytest.mark.parametrize(
+    "service_id",
+    [
+        None,
+        "some_service_id",
+    ],
+)
+def test_try_send_stop_time(service_id):
     job_id = "some job id"
     cmd_channel_mock = Mock()
     producer_mock = Mock()
@@ -44,14 +50,22 @@ def test_try_send_stop_time():
     topic_name = producer_mock.send.call_args_list[0].args[0]
     assert topic_name == test_topic
     message = deserialise_stop(producer_mock.send.call_args_list[0].args[1])
-    assert message.service_id == service_id
+    assert message.service_id == service_id or (
+        service_id is None and message.service_id == ""
+    )
     assert message.job_id == job_id
     assert message.command_id == result.command_id
     assert message.stop_time == int(stop_time.timestamp() * 1000)
 
 
-def test_try_abort_job_now():
-    service_id = "some service_id"
+@pytest.mark.parametrize(
+    "service_id",
+    [
+        None,
+        "some_service_id",
+    ],
+)
+def test_try_abort_job_now(service_id):
     job_id = "some job id"
     cmd_channel_mock = Mock()
     producer_mock = Mock()
@@ -65,7 +79,9 @@ def test_try_abort_job_now():
     topic_name = producer_mock.send.call_args_list[0].args[0]
     assert topic_name == test_topic
     message = deserialise_stop(producer_mock.send.call_args_list[0].args[1])
-    assert message.service_id == service_id
+    assert message.service_id == service_id or (
+        service_id is None and message.service_id == ""
+    )
     assert message.job_id == job_id
     assert message.command_id == result.command_id
 

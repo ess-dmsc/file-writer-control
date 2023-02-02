@@ -1,5 +1,8 @@
 # Version changes
 
+## Version 1.2.4
+* Do not require service_id in run stop commands, as per 6s4t schema.
+
 ## Version 1.2.3
 * Increased the maximum size of received messages and the command status timeout.
 
