@@ -86,7 +86,7 @@ def test_set_stop_time(service_id):
         "some_service_id",
     ],
 )
-def test_abort_write_job_with_id(service_id):
+def test_abort_write_job(service_id):
     worker_finder_mock = Mock()
     test_job = WriteJob("{}", "some_file_name", "some_broker", datetime.now())
     test_job_status = JobStatus(test_job.job_id)
