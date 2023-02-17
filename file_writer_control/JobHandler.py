@@ -60,7 +60,7 @@ class JobHandler:
             return ""
         return current_status.message
 
-    def set_stop_time(self, stop_time: datetime) -> Union[CommandHandler, None]:
+    def set_stop_time(self, stop_time: datetime) -> CommandHandler:
         """
         Set a new stop time for the file-writing job. There is no guarantee that the stop time will actually be changed.
         This call is not blocking. Calling this member function will have no effect on the stop-time before the write
@@ -76,13 +76,13 @@ class JobHandler:
             stop_time,
         )
 
-    def stop_now(self) -> Union[CommandHandler, None]:
+    def stop_now(self) -> CommandHandler:
         """
         See the documentation for abort_write_job().
         """
         return self.abort_write_job()
 
-    def abort_write_job(self) -> Union[CommandHandler, None]:
+    def abort_write_job(self) -> CommandHandler:
         """
         Tell the file-writing to abort writing. There is no guarantee that will actually happen though.
         This call is not blocking. Calling this member function will have no effect if done before a write job has
