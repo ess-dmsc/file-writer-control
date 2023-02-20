@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Union
 
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.JobStatus import JobState
