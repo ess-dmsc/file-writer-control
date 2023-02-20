@@ -163,7 +163,10 @@ class InThreadStatusTracker:
         current_command.message = answer.message
         current_command.response_code = Response.status_code
         self.known_jobs[answer.job_id].message = answer.message
-        self.known_jobs[answer.job_id].service_id = answer.service_id
+        try:
+            self.known_jobs[answer.job_id].service_id = answer.service_id
+        except RuntimeError:
+            pass
 
     def process_status(self, status_update: StatusMessage):
         """
