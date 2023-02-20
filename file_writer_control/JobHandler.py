@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Union
 
 from file_writer_control.CommandHandler import CommandHandler
 from file_writer_control.JobStatus import JobState
@@ -60,7 +59,7 @@ class JobHandler:
             return ""
         return current_status.message
 
-    def set_stop_time(self, stop_time: datetime) -> Union[CommandHandler, None]:
+    def set_stop_time(self, stop_time: datetime) -> CommandHandler:
         """
         Set a new stop time for the file-writing job. There is no guarantee that the stop time will actually be changed.
         This call is not blocking. Calling this member function will have no effect on the stop-time before the write
@@ -70,19 +69,19 @@ class JobHandler:
         :return: A CommandHandler instance that can be used to monitor the outcome of the attempt to set a new stop time.
         """
         current_status = self.worker_finder.get_job_status(self._job_id)
-        if current_status is None:
-            return None
         return self.worker_finder.try_send_stop_time(
-            current_status.service_id, self._job_id, stop_time
+            current_status.service_id if current_status else None,
+            self._job_id,
+            stop_time,
         )
 
-    def stop_now(self) -> Union[CommandHandler, None]:
+    def stop_now(self) -> CommandHandler:
         """
         See the documentation for abort_write_job().
         """
         return self.abort_write_job()
 
-    def abort_write_job(self) -> Union[CommandHandler, None]:
+    def abort_write_job(self) -> CommandHandler:
         """
         Tell the file-writing to abort writing. There is no guarantee that will actually happen though.
         This call is not blocking. Calling this member function will have no effect if done before a write job has
@@ -91,10 +90,8 @@ class JobHandler:
         :return: A CommandHandler instance that can be used to monitor the outcome of the attempt to set a new stop time.
         """
         current_status = self.worker_finder.get_job_status(self._job_id)
-        if current_status is None:
-            return None
         return self.worker_finder.try_send_abort(
-            current_status.service_id, self._job_id
+            current_status.service_id if current_status else None, self._job_id
         )
 
     @property
