@@ -1,7 +1,9 @@
 from datetime import datetime, timedelta
 from enum import Enum, auto
+from typing import Optional
 
-STATUS_MESSAGE_TIMEOUT = timedelta(seconds=5)
+
+DEFAULT_TIMEOUT = timedelta(seconds=15)
 
 
 class WorkerState(Enum):
@@ -20,9 +22,10 @@ class WorkerStatus(object):
     Contains general status information about a worker.
     """
 
-    def __init__(self, service_id: str):
+    def __init__(self, service_id: str, timeout: Optional[timedelta] = DEFAULT_TIMEOUT):
         self._last_update = datetime.now()
         self._service_id = service_id
+        self._timeout = timeout
         self._state = WorkerState.UNAVAILABLE
 
     def __eq__(self, other_status: "WorkerStatus") -> bool:
@@ -53,7 +56,7 @@ class WorkerStatus(object):
         """
         if (
             self.state != WorkerState.UNAVAILABLE
-            and current_time - self.last_update > STATUS_MESSAGE_TIMEOUT
+            and current_time - self.last_update > self._timeout
         ):
             self._state = WorkerState.UNAVAILABLE
             self._last_update = current_time

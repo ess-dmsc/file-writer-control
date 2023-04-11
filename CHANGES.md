@@ -1,5 +1,8 @@
 # Version changes
 
+## Version 1.2.5
+* Make JobState and WorkerState timeouts configurable.
+
 ## Version 1.2.4
 * Do not require service_id in run stop commands, as per 6s4t schema.
 
