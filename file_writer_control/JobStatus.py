@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 from enum import Enum, auto
 from typing import Optional, Dict
 
-JOB_STATUS_TIMEOUT = timedelta(seconds=5)
+
+DEFAULT_TIMEOUT = timedelta(seconds=15)
 
 
 class JobState(Enum):
@@ -24,8 +25,9 @@ class JobStatus:
     Contains general information about the (execution) of a job.
     """
 
-    def __init__(self, job_id: str):
+    def __init__(self, job_id: str, timeout: Optional[timedelta] = DEFAULT_TIMEOUT):
         self._job_id = job_id
+        self._timeout = timeout
         self._service_id = ""
         self._file_name = ""
         self._last_update = datetime.now()
@@ -60,7 +62,7 @@ class JobStatus:
             self.state != JobState.DONE
             and self.state != JobState.ERROR
             and self.state != JobState.TIMEOUT
-            and current_time - self.last_update > JOB_STATUS_TIMEOUT
+            and current_time - self.last_update > self._timeout
         ):
             self._state = JobState.TIMEOUT
             self._last_update = current_time
