@@ -1,11 +1,9 @@
 from json import loads
 from typing import Optional
 
-from streaming_data_types.action_response_answ import (
-    ActionOutcome,
-    ActionResponse,
-    ActionType,
-)
+from streaming_data_types.action_response_answ import (ActionOutcome,
+                                                       ActionResponse,
+                                                       ActionType)
 from streaming_data_types.status_x5f2 import StatusMessage
 
 from file_writer_control.CommandStatus import CommandState

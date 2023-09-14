@@ -1,11 +1,9 @@
+from datetime import timedelta
+
 import pytest
 
-from file_writer_control.CommandStatus import (
-    CommandState,
-    CommandStatus,
-    COMMAND_STATUS_TIMEOUT,
-)
-from datetime import timedelta
+from file_writer_control.CommandStatus import (COMMAND_STATUS_TIMEOUT,
+                                               CommandState, CommandStatus)
 
 
 def test_init():
