@@ -12,16 +12,21 @@ from streaming_data_types import serialise_answ as serialise_answer
 from streaming_data_types import serialise_pl72 as serialise_start
 from streaming_data_types import serialise_wrdn as serialise_done
 from streaming_data_types import serialise_x5f2 as serialise_status
-from streaming_data_types.action_response_answ import (ActionOutcome,
-                                                       ActionType, Response)
+from streaming_data_types.action_response_answ import (
+    ActionOutcome,
+    ActionType,
+    Response,
+)
 from streaming_data_types.finished_writing_wrdn import WritingFinished
 from streaming_data_types.run_start_pl72 import RunStartInfo
 from streaming_data_types.run_stop_6s4t import RunStopInfo
 from streaming_data_types.status_x5f2 import StatusMessage
 
 from file_writer_control.CommandStatus import CommandState, CommandStatus
-from file_writer_control.InThreadStatusTracker import (DEAD_ENTITY_TIME_LIMIT,
-                                                       InThreadStatusTracker)
+from file_writer_control.InThreadStatusTracker import (
+    DEAD_ENTITY_TIME_LIMIT,
+    InThreadStatusTracker,
+)
 from file_writer_control.JobStatus import JobState, JobStatus
 from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
 

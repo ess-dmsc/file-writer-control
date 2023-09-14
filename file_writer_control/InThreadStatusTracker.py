@@ -8,17 +8,15 @@ from streaming_data_types import deserialise_answ as deserialise_answer
 from streaming_data_types import deserialise_pl72 as deserialise_start
 from streaming_data_types import deserialise_wrdn as deserialise_stopped
 from streaming_data_types import deserialise_x5f2 as deserialise_status
-from streaming_data_types.action_response_answ import \
-    FILE_IDENTIFIER as ANSW_IDENTIFIER
+from streaming_data_types.action_response_answ import FILE_IDENTIFIER as ANSW_IDENTIFIER
 from streaming_data_types.action_response_answ import Response
-from streaming_data_types.finished_writing_wrdn import \
-    FILE_IDENTIFIER as STOPPED_IDENTIFIER
+from streaming_data_types.finished_writing_wrdn import (
+    FILE_IDENTIFIER as STOPPED_IDENTIFIER,
+)
 from streaming_data_types.finished_writing_wrdn import WritingFinished
-from streaming_data_types.run_start_pl72 import \
-    FILE_IDENTIFIER as START_IDENTIFIER
+from streaming_data_types.run_start_pl72 import FILE_IDENTIFIER as START_IDENTIFIER
 from streaming_data_types.run_start_pl72 import RunStartInfo
-from streaming_data_types.run_stop_6s4t import \
-    FILE_IDENTIFIER as STOP_TIME_IDENTIFIER
+from streaming_data_types.run_stop_6s4t import FILE_IDENTIFIER as STOP_TIME_IDENTIFIER
 from streaming_data_types.run_stop_6s4t import RunStopInfo
 from streaming_data_types.status_x5f2 import FILE_IDENTIFIER as STAT_IDENTIFIER
 from streaming_data_types.status_x5f2 import StatusMessage
@@ -27,8 +25,10 @@ from streaming_data_types.utils import get_schema
 from file_writer_control.CommandStatus import CommandState, CommandStatus
 from file_writer_control.JobStatus import JobState, JobStatus
 from file_writer_control.StateExtractor import (
-    extract_job_state_from_answer, extract_state_from_command_answer,
-    extract_worker_state_from_status)
+    extract_job_state_from_answer,
+    extract_state_from_command_answer,
+    extract_worker_state_from_status,
+)
 from file_writer_control.WorkerStatus import WorkerState, WorkerStatus
 
 DEAD_ENTITY_TIME_LIMIT = timedelta(hours=1)

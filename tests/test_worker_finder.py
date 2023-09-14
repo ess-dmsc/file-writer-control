@@ -2,8 +2,7 @@ from datetime import datetime
 from unittest.mock import Mock
 
 import pytest
-from streaming_data_types.run_stop_6s4t import \
-    deserialise_6s4t as deserialise_stop
+from streaming_data_types.run_stop_6s4t import deserialise_6s4t as deserialise_stop
 
 from file_writer_control.JobStatus import JobState, JobStatus
 from file_writer_control.WorkerFinder import WorkerFinderBase
