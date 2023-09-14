@@ -7,6 +7,8 @@ from datetime import datetime, timedelta
 from time import time as current_time
 from typing import Tuple
 
+from kafka_config import get_kafka_config
+
 from file_writer_control import JobHandler, JobState, WorkerJobPool, WriteJob
 
 JOB_HANDLER: JobHandler
@@ -21,6 +23,7 @@ def cli_parser() -> argparse.Namespace:
     fw_parser = argparse.ArgumentParser(
         fromfile_prefix_chars="@", description="FileWriter Starter"
     )
+    kafka_args = fw_parser.add_argument_group("Kafka broker options")
 
     fw_parser.add_argument(
         "-f",
@@ -45,14 +48,6 @@ def cli_parser() -> argparse.Namespace:
         type=str,
         required=True,
         help="Path to JSON config file.",
-    )
-    fw_parser.add_argument(
-        "-b",
-        "--broker",
-        metavar="kafka_broker",
-        type=str,
-        default="localhost:9092",
-        help="Kafka broker port.",
     )
     fw_parser.add_argument(
         "-t",
@@ -83,6 +78,38 @@ def cli_parser() -> argparse.Namespace:
         metavar="stop_writing",
         type=float,
         help="How long the file will be written.",
+    )
+
+    kafka_args.add_argument(
+        "-b",
+        "--broker",
+        metavar="kafka_broker",
+        type=str,
+        required=True,
+        help="Broker host and port (e.g. localhost:9092)",
+    )
+    kafka_args.add_argument(
+        "--security-protocol",
+        type=str,
+        default="SASL_SSL",
+        help="Kafka security protocol (PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL)",
+    )
+    kafka_args.add_argument(
+        "--sasl-mechanism",
+        type=str,
+        default="SCRAM-SHA-256",
+        help="Kafka SASL mechanism (GSSAPI, PLAIN, SCRAM-SHA-256, SCRAM-SHA-512, OAUTHBEARER)",
+    )
+    kafka_args.add_argument(
+        "-U",
+        "--sasl-username",
+        type=str,
+        help="Kafka SASL username",
+    )
+    kafka_args.add_argument(
+        "--ssl-ca-location",
+        type=str,
+        help="Kafka SSL CA certificate path",
     )
 
     args = fw_parser.parse_args()
@@ -139,8 +166,17 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
     command_topic = args.command_status_topic
     pool_topic = args.job_pool_topic
     config = args.config
+    kafka_config = get_kafka_config(
+        security_protocol=args.security_protocol,
+        sasl_mechanism=args.sasl_mechanism,
+        sasl_username=args.sasl_username,
+        sasl_password=args.sasl_password,
+        ssl_ca_location=args.ssl_ca_location,
+    )
     ACK_TIMEOUT = args.timeout
-    command_channel = WorkerJobPool(f"{host}/{pool_topic}", f"{host}/{command_topic}")
+    command_channel = WorkerJobPool(
+        f"{host}/{pool_topic}", f"{host}/{command_topic}", kafka_config=kafka_config
+    )
     JOB_HANDLER = JobHandler(worker_finder=command_channel)
     with open(config, "r") as f:
         nexus_structure = f.read()
@@ -170,15 +206,22 @@ def inform_status() -> None:
 
 
 def validate_namespace(args: argparse.Namespace) -> None:
-    argument_list = [
+    mandatory_argument_list = [
         args.filename,
         args.config,
         args.broker,
         args.command_status_topic,
         args.job_pool_topic,
     ]
-    for arg in argument_list:
+    for arg in mandatory_argument_list:
         is_empty(arg)
+
+    sasl_password = os.environ.get("SASL_PASSWORD")
+    setattr(args, "sasl_password", sasl_password)
+    if "SASL_" in args.security_protocol and not sasl_password:
+        raise ValueError(
+            f"Security protocol {args.security_protocol} requires password. Set username with --sasl-username and export the environment variable 'SASL_PASSWORD' with the password"
+        )
 
     # Validate extensions for filename and config
     check_file_extension(args.filename, "nxs")
@@ -193,7 +236,7 @@ def validate_namespace(args: argparse.Namespace) -> None:
 
 
 def check_file_extension(arg: str, extension: str) -> None:
-    if len(arg.split(".")) < 2 or arg.split(".")[1] != extension:
+    if len(arg.split(".")) < 2 or arg.split(".")[-1] != extension:
         raise ValueError(
             f"The argument, {arg}, has incorrect extension. "
             "Please use `.nxs` for output file and `.json` for "

@@ -2,22 +2,26 @@ import atexit
 import threading
 from datetime import datetime
 from queue import Queue
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
-from file_writer_control.CommandStatus import CommandStatus, CommandState
-from file_writer_control.InThreadStatusTracker import (
-    DEAD_ENTITY_TIME_LIMIT,
-    InThreadStatusTracker,
-)
+from file_writer_control.CommandStatus import CommandState, CommandStatus
+from file_writer_control.InThreadStatusTracker import (DEAD_ENTITY_TIME_LIMIT,
+                                                       InThreadStatusTracker)
 from file_writer_control.JobStatus import JobStatus
 from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 from file_writer_control.WorkerStatus import WorkerStatus
 
 
-def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queue):
+def thread_function(
+    host_port: str,
+    topic: str,
+    in_queue: Queue,
+    out_queue: Queue,
+    kafka_config: Dict[str, str] = {},
+):
     """
     Background thread for consuming Kafka messages.
     :param host_port: The host + port of the Kafka broker that we are using.
@@ -35,6 +39,7 @@ def thread_function(host_port: str, topic: str, in_queue: Queue, out_queue: Queu
                 fetch_max_bytes=52428800 * 6,
                 max_partition_fetch_bytes=52428800 * 10,
                 consumer_timeout_ms=100,
+                **kafka_config
             )  # Roughly 300MB
             break
         except NoBrokersAvailable:
@@ -61,7 +66,7 @@ class CommandChannel(object):
     .. note:: This class implements a thread that will continuously attempt to connect to a Kafka broker.
     """
 
-    def __init__(self, command_topic_url: str):
+    def __init__(self, command_topic_url: str, kafka_config: Dict[str, str] = {}):
         """
         Constructor.
         :param command_topic_url: The url of the Kafka topic to where the file-writer status/command messages are published.
@@ -74,6 +79,7 @@ class CommandChannel(object):
             "topic": kafka_address.topic,
             "in_queue": self.to_thread_queue,
             "out_queue": self.status_queue,
+            "kafka_config": kafka_config,
         }
         self.map_of_workers: Dict[str, WorkerStatus] = {}
         self.map_of_jobs: Dict[str, JobStatus] = {}

@@ -1,3 +1,5 @@
+from typing import Dict
+
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
 
@@ -18,6 +20,7 @@ class WorkerJobPool(WorkerFinder):
         job_topic_url: str,
         command_topic_url: str,
         max_message_size: int = 1048576 * 200,
+        kafka_config: Dict[str, str] = {},
     ):
         """
         :param job_topic_url: The Kafka topic that the available file-writers are listening to for write jobs.
@@ -25,7 +28,7 @@ class WorkerJobPool(WorkerFinder):
         commands from.
         :param max_message_size: The maximum message (actually "request") size.
         """
-        super().__init__(command_topic_url)
+        super().__init__(command_topic_url, kafka_config=kafka_config)
         self._job_pool = KafkaTopicUrl(job_topic_url)
         self._max_message_size = max_message_size
         try:
@@ -33,6 +36,7 @@ class WorkerJobPool(WorkerFinder):
                 bootstrap_servers=[self._job_pool.host_port],
                 max_request_size=max_message_size,
                 buffer_memory=max_message_size,
+                **kafka_config,
             )
         except NoBrokersAvailable as e:
             raise NoBrokersAvailable(

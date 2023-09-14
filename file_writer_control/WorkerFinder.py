@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from kafka import KafkaProducer
 from kafka.errors import NoBrokersAvailable
@@ -125,11 +125,13 @@ class WorkerFinderBase:
 
 
 class WorkerFinder(WorkerFinderBase):
-    def __init__(self, command_topic_url: str):
-        temp_cmd_ch = CommandChannel(command_topic_url)
+    def __init__(self, command_topic_url: str, kafka_config: Dict[str, str] = {}):
+        temp_cmd_ch = CommandChannel(command_topic_url, kafka_config=kafka_config)
         command_url = KafkaTopicUrl(command_topic_url)
         try:
-            temp_producer = KafkaProducer(bootstrap_servers=[command_url.host_port])
+            temp_producer = KafkaProducer(
+                bootstrap_servers=[command_url.host_port], **kafka_config
+            )
         except NoBrokersAvailable as e:
             raise NoBrokersAvailable(
                 f'Unable to find brokers (or connect to brokers) on address: "{command_url.host_port}"'

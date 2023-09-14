@@ -1,5 +1,8 @@
 # Version changes
 
+## Version 1.3.0
+* Support SASL and SSL in Kafka connections.
+
 ## Version 1.2.5
 * Make JobState and WorkerState timeouts configurable.
 
