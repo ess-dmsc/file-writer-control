@@ -8,7 +8,7 @@ from time import time as current_time
 from kafka_config import get_kafka_config
 
 from cli.start_file_writer import is_empty
-from file_writer_control import JobHandler, JobState, WorkerFinder, WorkerJobPool
+from file_writer_control import JobHandler, JobState, WorkerJobPool
 
 
 def cli_parser() -> argparse.Namespace:
