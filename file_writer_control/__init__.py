@@ -1,9 +1,9 @@
 from ._version import version
+from .CommandStatus import CommandState
 from .JobHandler import JobHandler
+from .JobStatus import JobState
 from .WorkerJobPool import WorkerJobPool
 from .WriteJob import WriteJob
-from .CommandStatus import CommandState
-from .JobStatus import JobState
 
 __all__ = [
     "JobHandler",

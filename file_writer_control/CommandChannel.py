@@ -2,16 +2,14 @@ import atexit
 import threading
 from datetime import datetime
 from queue import Queue
-from typing import Dict, List, Union, Optional
+from typing import Dict, List, Optional, Union
 
 from kafka import KafkaConsumer
 from kafka.errors import NoBrokersAvailable
 
-from file_writer_control.CommandStatus import CommandStatus, CommandState
-from file_writer_control.InThreadStatusTracker import (
-    DEAD_ENTITY_TIME_LIMIT,
-    InThreadStatusTracker,
-)
+from file_writer_control.CommandStatus import CommandState, CommandStatus
+from file_writer_control.InThreadStatusTracker import (DEAD_ENTITY_TIME_LIMIT,
+                                                       InThreadStatusTracker)
 from file_writer_control.JobStatus import JobStatus
 from file_writer_control.KafkaTopicUrl import KafkaTopicUrl
 from file_writer_control.WorkerStatus import WorkerStatus

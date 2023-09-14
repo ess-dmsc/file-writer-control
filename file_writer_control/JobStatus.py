@@ -1,7 +1,6 @@
 from datetime import datetime, timedelta
 from enum import Enum, auto
-from typing import Optional, Dict
-
+from typing import Dict, Optional
 
 DEFAULT_TIMEOUT = timedelta(seconds=15)
 
