@@ -114,7 +114,7 @@ def create_job_handler(args: argparse.Namespace, job_id: str) -> JobHandler:
     )
     job_handler = JobHandler(worker_finder=command_channel, job_id=job_id)
     # Required for formation of the handler.
-    time.sleep(3)
+    time.sleep(10)
     return job_handler
 
 
