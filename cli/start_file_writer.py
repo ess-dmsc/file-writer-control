@@ -197,7 +197,7 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
 def inform_status() -> None:
     if JOB_HANDLER.get_state() == JobState.WRITING:
         print("Use CTRL-C to enter interactive menu.")
-        print("Writing.", end="", flush=True)
+        print(f"Job {JOB_HANDLER.job_id} writing.", end="", flush=True)
     while JOB_HANDLER.get_state() == JobState.WRITING:
         print(".", end="", flush=True)
         time.sleep(1)
