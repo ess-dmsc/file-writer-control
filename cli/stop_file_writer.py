@@ -1,8 +1,11 @@
 import argparse
+import os
 import sys
 import time
 from datetime import datetime, timedelta
 from time import time as current_time
+
+from kafka_config import get_kafka_config
 
 from cli.start_file_writer import is_empty
 from file_writer_control import JobHandler, JobState, WorkerJobPool
@@ -16,6 +19,7 @@ def cli_parser() -> argparse.Namespace:
     fw_parser = argparse.ArgumentParser(
         fromfile_prefix_chars="@", description="FileWriter Stopper"
     )
+    kafka_args = fw_parser.add_argument_group("Kafka broker options")
 
     fw_parser.add_argument(
         "-s",
@@ -31,14 +35,6 @@ def cli_parser() -> argparse.Namespace:
         nargs=2,
         type=str,
         help="Stop FileWriter after a given time in seconds.",
-    )
-    fw_parser.add_argument(
-        "-b",
-        "--broker",
-        metavar="kafka_broker",
-        type=str,
-        default="localhost:9092",
-        help="Kafka broker port.",
     )
     fw_parser.add_argument(
         "-t",
@@ -65,6 +61,38 @@ def cli_parser() -> argparse.Namespace:
         help="How long to wait for timeout on acknowledgement.",
     )
 
+    kafka_args.add_argument(
+        "-b",
+        "--broker",
+        metavar="kafka_broker",
+        type=str,
+        required=True,
+        help="Broker host and port (e.g. localhost:9092)",
+    )
+    kafka_args.add_argument(
+        "--security-protocol",
+        type=str,
+        default="SASL_SSL",
+        help="Kafka security protocol (PLAINTEXT, SSL, SASL_PLAINTEXT, SASL_SSL)",
+    )
+    kafka_args.add_argument(
+        "--sasl-mechanism",
+        type=str,
+        default="SCRAM-SHA-256",
+        help="Kafka SASL mechanism (GSSAPI, PLAIN, SCRAM-SHA-256, SCRAM-SHA-512, OAUTHBEARER)",
+    )
+    kafka_args.add_argument(
+        "-U",
+        "--sasl-username",
+        type=str,
+        help="Kafka SASL username",
+    )
+    kafka_args.add_argument(
+        "--ssl-ca-location",
+        type=str,
+        help="Kafka SSL CA certificate path",
+    )
+
     args = fw_parser.parse_args()
 
     return args
@@ -74,10 +102,19 @@ def create_job_handler(args: argparse.Namespace, job_id: str) -> JobHandler:
     host = args.broker
     command_topic = args.command_status_topic
     pool_topic = args.job_pool_topic
-    command_channel = WorkerJobPool(f"{host}/{pool_topic}", f"{host}/{command_topic}")
+    kafka_config = get_kafka_config(
+        security_protocol=args.security_protocol,
+        sasl_mechanism=args.sasl_mechanism,
+        sasl_username=args.sasl_username,
+        sasl_password=args.sasl_password,
+        ssl_ca_location=args.ssl_ca_location,
+    )
+    command_channel = WorkerJobPool(
+        f"{host}/{pool_topic}", f"{host}/{command_topic}", kafka_config=kafka_config
+    )
     job_handler = JobHandler(worker_finder=command_channel, job_id=job_id)
     # Required for formation of the handler.
-    time.sleep(3)
+    time.sleep(10)
     return job_handler
 
 
@@ -118,15 +155,23 @@ def validate_namespace(args: argparse.Namespace) -> None:
             "be used simultaneously."
         )
         sys.exit()
-    argument_list = [
+    mandatory_argument_list = [
         args.stop,
         args.broker,
         args.command_status_topic,
         args.job_pool_topic,
+        args.stop_after,
     ]
-    for arg in argument_list + args.stop_after:
+    for arg in mandatory_argument_list:
         if arg:
             is_empty(arg)
+
+    sasl_password = os.environ.get("SASL_PASSWORD")
+    setattr(args, "sasl_password", sasl_password)
+    if "SASL_" in args.security_protocol and not sasl_password:
+        raise ValueError(
+            f"Security protocol {args.security_protocol} requires password. Set username with --sasl-username and export the environment variable 'SASL_PASSWORD' with the password"
+        )
 
 
 def stop_writer():
