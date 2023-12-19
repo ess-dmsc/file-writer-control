@@ -3,7 +3,7 @@ import os
 import signal
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from time import time as current_time
 from typing import Tuple
 
@@ -13,6 +13,10 @@ from file_writer_control import JobHandler, JobState, WorkerJobPool, WriteJob
 
 JOB_HANDLER: JobHandler
 ACK_TIMEOUT: float
+
+
+def str_to_datetime(s):
+    return datetime.strptime(s, "%Y%m%dT%H%M%S").replace(tzinfo=timezone.utc)
 
 
 def cli_parser() -> argparse.Namespace:
@@ -77,7 +81,20 @@ def cli_parser() -> argparse.Namespace:
         "--stop",
         metavar="stop_writing",
         type=float,
-        help="How long the file will be written.",
+        help="How long the file will be written (seconds)",
+    )
+    fw_parser.add_argument(
+        '-S',
+        '--start-time',
+        type=str_to_datetime,
+        default=datetime.now(),
+        help='Job start time (UTC). Format "%Y%m%dT%H%M%S"',
+    )
+    fw_parser.add_argument(
+        '-P',
+        '--stop-time',
+        type=str_to_datetime,
+        help='Job stop time (UTC). Format "%Y%m%dT%H%M%S"',
     )
 
     kafka_args.add_argument(
@@ -121,8 +138,10 @@ def file_writer(args: argparse.Namespace) -> None:
     write_job = prepare_write_job(args)
     start_time, timeout = start_write_job(write_job)
 
-    if args.stop:
-        stop_write_job(args.stop, start_time, timeout)
+    if args.stop_time:
+        print(f"Setting stop time to {args.stop_time}")
+        time.sleep(1)
+        stop_write_job(args.stop_time, timeout)
 
     inform_status()
 
@@ -131,16 +150,14 @@ def start_write_job(write_job: WriteJob) -> Tuple[datetime, float]:
 
     start_handler = JOB_HANDLER.start_job(write_job)
     timeout = int(current_time()) + ACK_TIMEOUT
-    start_time = datetime.now()
     while not start_handler.is_done():
         if int(current_time()) > timeout:
             raise ValueError("Timeout.")
-    return start_time, timeout
+    return write_job.start, timeout
 
 
-def stop_write_job(stop: float, start_time: datetime, timeout: float) -> None:
+def stop_write_job(stop_time: datetime, timeout: float) -> None:
 
-    stop_time = start_time + timedelta(seconds=stop)
     stop_handler = JOB_HANDLER.set_stop_time(stop_time)
     while not stop_handler.is_done() and not JOB_HANDLER.is_done():
         if int(current_time()) > timeout:
@@ -160,6 +177,7 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
     global JOB_HANDLER
     global ACK_TIMEOUT
 
+    start_time = args.start_time
     file_name = args.filename
     job_id = args.job_id
     host = args.broker
@@ -182,14 +200,14 @@ def prepare_write_job(args: argparse.Namespace) -> WriteJob:
         nexus_structure = f.read()
     if job_id:
         write_job = WriteJob(
-            nexus_structure, file_name, host, datetime.now(), job_id=job_id
+            nexus_structure, file_name, host, start_time, job_id=job_id
         )
     else:
         write_job = WriteJob(
             nexus_structure,
             file_name,
             host,
-            datetime.now(),
+            start_time,
         )
     return write_job
 
@@ -215,6 +233,8 @@ def validate_namespace(args: argparse.Namespace) -> None:
     ]
     for arg in mandatory_argument_list:
         is_empty(arg)
+    if not args.stop_time and args.stop:
+        args.stop_time = datetime.now() + timedelta(seconds=int(args.stop))
 
     sasl_password = os.environ.get("SASL_PASSWORD")
     setattr(args, "sasl_password", sasl_password)
@@ -280,7 +300,7 @@ def set_time_and_stop() -> None:
     try:
         stop_time = float(stop_time)
         timeout = int(current_time()) + ACK_TIMEOUT
-        stop_write_job(stop_time, datetime.now(), timeout)
+        stop_write_job(datetime.now() + timedelta(seconds=stop_time), timeout)
     except ValueError:
         # The CLI will simply continue.
         print("Input should be a float.")
