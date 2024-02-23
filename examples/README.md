@@ -28,9 +28,15 @@ job_handler = JobHandler(worker_finder=worker_pool)
 job_handler.start_job(WriteJob(nexus_structure="{...}", "file.nxs", "dmsc-kafka01:9092", datetime.now()))
 ```
 
+You can also stop jobs via the use of:
+
+```python
+stop_write_job_now(job_handler)
+```
+
 ## Find which workers are available
 
-It is possible to list currently known workers using the `WorkerJobPool` class. This is done as follows (also in [*list_status.py*](list_workers.py)):
+It is possible to list currently known workers using the `WorkerJobPool` class. This is done as follows (also in [*list_status.py*](list_status.py)):
 
 ```python
 from file_writer_control.WorkerJobPool import WorkerJobPool

@@ -3,39 +3,60 @@ import time
 from file_writer_control import WorkerJobPool
 
 
+def print_columns(titles: list | tuple, values: list[list | tuple] | tuple[list | tuple, ...]):
+    if not len(values) or not len(titles):
+        return
+    widths = [len(str(x)) for x in titles]
+    for row in values:
+        for i, v in enumerate(row):
+            n = len(str(v))
+            if n > widths[i]:
+                widths[i] = n
+    w_format = ''.join([f'{{:{n+1:d}s}}' for n in widths])
+    print(w_format.format(*[str(x) for x in titles]))
+    print(w_format.format(*['-'*n for n in widths]))
+    for row in values:
+        print(w_format.format(*[str(x) for x in row]))
+    print()
+
+
 def print_current_state(channel: WorkerJobPool):
-    print("Known workers")
-    w_format = "{:45s}{:30s}"
-    print(w_format.format("Service id", "Current state"))
-    print("-" * 80)
-    for worker in channel.list_known_workers():
-        print(w_format.format(worker.service_id, worker.state))
+    workers = channel.list_known_workers()
+    if len(workers):
+        print("Known workers")
+        print_columns(("Service id", "Current state"), [(w.service_id, w.state) for w in workers])
+    else:
+        print("No workers")
 
-    print("\nKnown jobs")
-    j_format = "{:26s}{:30s}{:30s}"
-    print(j_format.format("Service id", "Job id", "Current state"))
-    print("-" * 80)
-    for job in channel.list_known_jobs():
-        print(j_format.format(job.service_id, job.job_id, job.state))
-        if job.file_name is not None:
-            print(f"    File name: {job.file_name}")
-        if len(job.message) > 0:
-            print(f"    Message: {job.message}")
+    jobs = channel.list_known_jobs()
+    if len(jobs):
+        print("Known jobs")
+        job_info = [(j.service_id, j.job_id, j.state, j.file_name if j.file_name else j.message) for j in jobs]
+        print_columns(("Service id", "Job id", "Current state", "File name or message"), job_info)
+    else:
+        print("No jobs")
 
-    print("\nKnown commands")
-    c_format = j_format
-    print(c_format.format("Job id", "Command id", "Current state"))
-    print("-" * 80)
-    for command in channel.list_known_commands():
-        print(c_format.format(command.job_id, command.command_id, command.state))
-        if len(command.message) > 0:
-            print("    Message: {}".format(command.message))
+    commands = channel.list_known_commands()
+    if len(commands):
+        print("Known commands")
+        print_columns(("Job id", "Command id", "Current state", "Message"),
+                      [(c.job_id, c.command_id, c.state, c.message) for c in commands])
+    else:
+        print("No commands")
+
+
+def main():
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('-b', '--broker', help="Kafka broker", default='localhost:9092', type=str)
+    parser.add_argument('-c', '--command', help="Writer command topic", default="WriterCommand", type=str)
+    parser.add_argument('-t', '--topic', help='Writer job topic', default='WriterJobs', type=str)
+    parser.add_argument('-s', '--sleep', type=int, help='Post pool creation sleep time', default=1)
+    args = parser.parse_args()
+    pool = WorkerJobPool(f'{args.broker}/{args.topic}', f'{args.broker}/{args.command}')
+    time.sleep(args.sleep)
+    print_current_state(pool)
 
 
 if __name__ == "__main__":
-    kafka_host = "dmsc-kafka01:9092"
-    worker_job_pool = WorkerJobPool(
-        f"{kafka_host}/job_pool_topic", f"{kafka_host}/command_topic"
-    )
-    time.sleep(10)
-    print_current_state(worker_job_pool)
+    main()
