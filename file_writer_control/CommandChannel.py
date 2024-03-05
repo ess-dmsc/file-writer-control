@@ -41,7 +41,7 @@ def thread_function(
                 fetch_max_bytes=52428800 * 6,
                 max_partition_fetch_bytes=52428800 * 10,
                 consumer_timeout_ms=100,
-                **kafka_config
+                **kafka_config,
             )  # Roughly 300MB
             break
         except NoBrokersAvailable:
@@ -139,16 +139,19 @@ class CommandChannel(object):
             current_time = datetime.now()
 
         def handle_worker_status(status_update):
+            print(f"{datetime.now()} handle_worker_status() for {status_update}")
             if status_update.service_id not in self.map_of_workers:
                 self.map_of_workers[status_update.service_id] = status_update
             self.map_of_workers[status_update.service_id].update_status(status_update)
 
         def handle_job_status(status_update):
+            print(f"{datetime.now()} handle_job_status() for {status_update}")
             if status_update.job_id not in self.map_of_jobs:
                 self.map_of_jobs[status_update.job_id] = status_update
             self.map_of_jobs[status_update.job_id].update_status(status_update)
 
         def handle_command_status(status_update):
+            print(f"{datetime.now()} handle_command_status() for {status_update}")
             if status_update.command_id not in self.map_of_commands:
                 self.map_of_commands[status_update.command_id] = status_update
             self.map_of_commands[status_update.command_id].update_status(status_update)
