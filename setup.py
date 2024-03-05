@@ -27,7 +27,7 @@ setup(
     author="ScreamingUdder",
     url="https://github.com/ess-dmsc/file_writer_control",
     license="BSD 2-Clause License",
-    packages=find_packages(exclude=["tests", "examples"]),
+    packages=find_packages(include=["file_writer_control"]),
     entry_points={
         "console_scripts": [
             "start_file_writer = cli.start_file_writer:start_writer",
